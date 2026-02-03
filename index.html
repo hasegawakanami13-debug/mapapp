@@ -2,29 +2,140 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>高知クエスト - 土佐の秘宝を探せ</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* CSSをここに集約 */
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+
+        #map { height: 100vh; width: 100%; z-index: 1; }
+
+        /* 画面上のUI */
+        #ui-layer {
+            position: absolute; top: 10px; left: 10px; z-index: 100;
+            background: rgba(0, 0, 0, 0.8); color: gold;
+            padding: 10px 20px; border: 3px solid #8b4513; border-radius: 10px;
+            pointer-events: none; /* 下の地図操作を邪魔しない */
+        }
+
+        /* クイズのポップアップ（モーダル） */
+        #quiz-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .quiz-content {
+            background: #f4e4bc; color: #333; padding: 25px;
+            border: 5px solid #5d4037; width: 85%; max-width: 400px;
+            text-align: center; border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .option-btn {
+            display: block; width: 100%; margin: 10px 0; padding: 12px;
+            background: #8d6e63; color: white; border: none; 
+            cursor: pointer; border-radius: 5px; font-weight: bold;
+        }
+
+        .option-btn:hover { background: #6d4c41; }
+
+        .close-btn {
+            margin-top: 15px; background: transparent; border: 1px solid #5d4037;
+            color: #5d4037; cursor: pointer; padding: 5px 10px;
+        }
+
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
 
     <div id="ui-layer">
-        <h1>🗡️ 高知クエスト</h1>
-        <p id="score">獲得した秘宝: 0</p>
+        <h2 style="margin:0; font-size: 1.2rem;">🗡️ 高知クエスト</h2>
+        <p id="score" style="margin:5px 0 0 0;">獲得した秘宝: 0</p>
     </div>
 
     <div id="map"></div>
 
     <div id="quiz-modal" class="hidden">
         <div class="quiz-content">
-            <h2 id="quiz-spot-name">???</h2>
-            <p id="quiz-question">問題がここに表示されます</p>
+            <h2 id="quiz-spot-name" style="color: #5d4037;">???</h2>
+            <p id="quiz-question" style="font-size: 1.1rem; line-height: 1.5;">問題が表示されます</p>
             <div id="quiz-options"></div>
-            <button onclick="closeQuiz()">逃げる</button>
+            <button class="close-btn" onclick="closeQuiz()">逃げる</button>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // JSをここに集約
+        
+        // 1. 地図の初期化
+        const map = L.map('map').setView([33.5670, 133.5430], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        let score = 0;
+
+        // 2. 20箇所のデータ（座標を右クリックで調べて追加していけます！）
+        const questSpots = [
+            { name: "高知城", pos: [33.5607, 133.5314], q: "高知城の天守は日本に12しかない「現存天守」のひとつ？", ops: ["はい", "いいえ"], ans: "はい" },
+            { name: "はりまや橋", pos: [33.5594, 133.5428], q: "はりまや橋の有名な伝説に登場する僧の名前は？", ops: ["純信", "良寛", "一休"], ans: "純信" },
+            { name: "桂浜", pos: [33.4971, 133.5744], q: "桂浜に立つ坂本龍馬像。龍馬が向いている方向はどこ？", ops: ["太平洋", "高知城", "富士山"], ans: "太平洋" },
+            { name: "高知駅", pos: [33.5672, 133.5435], q: "駅前にある「三志士像」。武市半平太、坂本龍馬ともう一人は？", ops: ["中岡慎太郎", "岩崎弥太郎", "板垣退助"], ans: "中岡慎太郎" },
+            { name: "牧野植物園", pos: [33.5463, 133.5775], q: "牧野富太郎博士が命名した、この地を代表する植物は？", ops: ["バイカオウレン", "チューリップ", "ラフレシア"], ans: "バイカオウレン" },
+            { name: "ひろめ市場", pos: [33.5606, 133.5361], q: "ひろめ市場で一番人気のグルメといえば？", ops: ["カツオのタタキ", "うどん", "お好み焼き"], ans: "カツオのタタキ" },
+            { name: "高知よさこい情報交流館", pos: [33.5590, 133.5450], q: "よさこい祭りで鳴らして踊る道具の名前は？", ops: ["鳴子（なるこ）", "バチ", "扇子"], ans: "鳴子（なるこ）" }
+            // ここにあと13個追加して20個にしてみてください！
+        ];
+
+        // 3. マーカーを一気に設置
+        questSpots.forEach((spot, index) => {
+            const marker = L.marker(spot.pos).addTo(map);
+            
+            // マーカーをクリックしたらクイズ開始
+            marker.on('click', () => {
+                openQuiz(index);
+            });
+        });
+
+        // 4. クイズ表示
+        function openQuiz(index) {
+            const spot = questSpots[index];
+            document.getElementById('quiz-spot-name').innerText = `【 ${spot.name} の試練 】`;
+            document.getElementById('quiz-question').innerText = spot.q;
+            
+            const optionsDiv = document.getElementById('quiz-options');
+            optionsDiv.innerHTML = ""; 
+            
+            spot.ops.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, spot.ans);
+                optionsDiv.appendChild(btn);
+            });
+            
+            document.getElementById('quiz-modal').classList.remove('hidden');
+        }
+
+        // 5. 正解判定
+        function checkAnswer(userAns, correctAns) {
+            if (userAns === correctAns) {
+                alert("✨ 正解！秘宝を手に入れた！");
+                score++;
+                document.getElementById('score').innerText = `獲得した秘宝: ${score}`;
+            } else {
+                alert("💀 残念！修行し直しぜよ。");
+            }
+            closeQuiz();
+        }
+
+        function closeQuiz() {
+            document.getElementById('quiz-modal').classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
