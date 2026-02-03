@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>高知 はしご酒ルートメーカー</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <h1>🍶 はしご酒 酔いどれルートメーカー</h1>
+  <p>起点：ひろめ市場</p>
+</header>
+
+<section class="controls">
+  <label>
+    酔い度：
+    <select id="drunkLevel">
+      <option value="0">しらふ</option>
+      <option value="0.0002">ほろ酔い</option>
+      <option value="0.0005">千鳥足</option>
+      <option value="0.001">泥酔</option>
+    </select>
+  </label>
+
+  <label>
+    滞在時間（分）：
+    <input type="number" id="stayTime" value="30">
+  </label>
+
+  <button id="routeBtn">ルート生成</button>
+</section>
+
+<div id="info"></div>
+<div id="map"></div>
+
+<script src="script.js"></script>
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+</script>
+
+</body>
+</html>
