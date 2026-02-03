@@ -1,49 +1,30 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>高知 はしご酒ルートメーカー</title>
-
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <title>高知クエスト - 土佐の秘宝を探せ</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
-  <h1>🍶 はしご酒 酔いどれルートメーカー</h1>
-  <p>起点：ひろめ市場</p>
-</header>
+    <div id="ui-layer">
+        <h1>🗡️ 高知クエスト</h1>
+        <p id="score">獲得した秘宝: 0</p>
+    </div>
 
-<section class="controls">
-  <label>
-    酔い度：
-    <select id="drunkLevel">
-      <option value="0">しらふ</option>
-      <option value="0.0002">ほろ酔い</option>
-      <option value="0.0005">千鳥足</option>
-      <option value="0.001">泥酔</option>
-    </select>
-  </label>
+    <div id="map"></div>
 
-  <label>
-    滞在時間（分）：
-    <input type="number" id="stayTime" value="30">
-  </label>
+    <div id="quiz-modal" class="hidden">
+        <div class="quiz-content">
+            <h2 id="quiz-spot-name">???</h2>
+            <p id="quiz-question">問題がここに表示されます</p>
+            <div id="quiz-options"></div>
+            <button onclick="closeQuiz()">逃げる</button>
+        </div>
+    </div>
 
-  <button id="routeBtn">ルート生成</button>
-</section>
-
-<div id="info"></div>
-<div id="map"></div>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="script.js"></script>
-
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
