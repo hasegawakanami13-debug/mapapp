@@ -65,9 +65,10 @@
     <script>
         // 1. 地図設定（高知中心）
         const map = L.map('map', {
-            tap: true, // モバイルでのタップ反応を良くする
-            zoomControl: false // UIと被らないようズームボタンを消す
-        }).setView([33.5600, 133.5400], 14);
+    tap: true,
+    zoomControl: false 
+}).setView([33.3, 133.5], 9);
+
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
