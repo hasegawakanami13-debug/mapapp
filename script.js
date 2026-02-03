@@ -1,77 +1,67 @@
-let map;
-let directionsService;
-let directionsRenderer;
+// ひろめ市場
+const HIROME = [33.5597, 133.5311];
 
-const HIROME = { lat: 33.5597, lng: 133.5311 };
+let map;
+let routeLine;
+
+initMap();
 
 function initMap() {
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: HIROME,
-    zoom: 16,
-  });
+  map = L.map("map").setView(HIROME, 16);
 
-  directionsService = new google.maps.DirectionsService();
-  directionsRenderer = new google.maps.DirectionsRenderer({
-    suppressMarkers: false,
-    polylineOptions: {
-      strokeColor: "#7a1f1f",
-      strokeWeight: 5,
-    },
-  });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap contributors",
+  }).addTo(map);
 
-  directionsRenderer.setMap(map);
+  L.marker(HIROME).addTo(map).bindPopup("ひろめ市場").openPopup();
 }
 
-document.getElementById("routeBtn").addEventListener("click", () => {
-  generateRoute();
-});
+document.getElementById("routeBtn").addEventListener("click", generateRoute);
 
 function generateRoute() {
   const drunkLevel = parseFloat(document.getElementById("drunkLevel").value);
   const stayTime = parseInt(document.getElementById("stayTime").value);
 
-  const destination = {
-    lat: 33.5585 + Math.random() * 0.002,
-    lng: 133.532 + Math.random() * 0.002,
-  };
+  // 仮の目的地（周辺居酒屋を想定）
+  const destination = [
+    HIROME[0] + (Math.random() - 0.5) * 0.004,
+    HIROME[1] + (Math.random() - 0.5) * 0.004,
+  ];
 
-  directionsService.route(
-    {
-      origin: HIROME,
-      destination,
-      travelMode: google.maps.TravelMode.WALKING,
-    },
-    (result, status) => {
-      if (status === "OK") {
-        const route = result.routes[0];
-        const path = route.overview_path;
+  const path = createWobblyPath(HIROME, destination, drunkLevel);
 
-        const wobblePath = path.map((p) => ({
-          lat: p.lat() + randomOffset(drunkLevel),
-          lng: p.lng() + randomOffset(drunkLevel),
-        }));
+  if (routeLine) {
+    map.removeLayer(routeLine);
+  }
 
-        directionsRenderer.setDirections(result);
-        drawWobbleLine(wobblePath);
+  routeLine = L.polyline(path, {
+    color: "#333",
+    weight: 4,
+    opacity: 0.8,
+  }).addTo(map);
 
-        const drinks = Math.floor(stayTime / 10);
-        document.getElementById("info").innerText =
-          `返杯モード：この店で ${drinks} 杯はいけるき 🍺`;
-      }
-    }
-  );
+  map.fitBounds(routeLine.getBounds());
+
+  const drinks = Math.floor(stayTime / 10);
+  document.getElementById("info").innerText =
+    `返杯モード：この店で ${drinks} 杯はいけるき 🍶`;
 }
 
-function randomOffset(level) {
-  return (Math.random() - 0.5) * level;
-}
+// 直線＋千鳥足ノイズ
+function createWobblyPath(start, end, level) {
+  const points = [];
+  const steps = 20;
 
-function drawWobbleLine(path) {
-  new google.maps.Polyline({
-    path,
-    strokeColor: "#333",
-    strokeOpacity: 0.7,
-    strokeWeight: 3,
-    map,
-  });
+  for (let i = 0; i <= steps; i++) {
+    const lat =
+      start[0] + (end[0] - start[0]) * (i / steps) +
+      (Math.random() - 0.5) * level;
+    const lng =
+      start[1] + (end[1] - start[1]) * (i / steps) +
+      (Math.random() - 0.5) * level;
+
+    points.push([lat, lng]);
+  }
+
+  return points;
 }
