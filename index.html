@@ -71,31 +71,16 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const japanBounds = [[20.0, 122.0], [50.0, 154.0]];
-
-const map = L.map('map', {
-    tap: true,
-    zoomControl: false,
-    // maxBounds: japanBounds, // 必要に応じて有効化
-    minZoom: 4,
-    maxZoom: 18
-}).setView([36.0, 137.5], 5); // 日本全体が見える座標とズーム
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap'
-}).addTo(map);
+        // 日本全体を表示する設定（重複を削除し一本化）
         const map = L.map('map', {
             tap: true,
             zoomControl: false,
-            maxBounds: kochiBounds,
-            maxBoundsViscosity: 1.0,
-            minZoom: 9,
-            maxZoom: 15
-        }).setView([33.35, 133.4], 9);
+            minZoom: 4,
+            maxZoom: 18
+        }).setView([36.0, 137.5], 5); 
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap',
-            bounds: kochiBounds
+            attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
         let score = 0;
@@ -168,7 +153,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             const markerIcon = isNandoku ? blueIcon : redIcon;
 
             const marker = L.marker(spot.pos, { icon: markerIcon }).addTo(map);
-            spot.marker = marker; // マーカーを保存
+            spot.marker = marker; 
 
             marker.bindTooltip(`<b>${spot.name}</b><br>難易度：${spot.level}`, {
                 direction: 'top', offset: [0, -10], className: 'custom-tooltip'
@@ -201,20 +186,20 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 alert("正解！秘宝ゲットぜよ！");
                 score++;
                 document.getElementById('score').innerText = `獲得した秘宝: ${score} / ${questSpots.length}`;
-                
-                // 正解したピンをゴールドに変更
                 questSpots[index].marker.setIcon(goldIcon);
             } else {
                 alert(`ハズレ！残念やったねぇ。\n正解は「${correctAns}」ぜよ！\n学び直して出直しちや！`);
             }
             closeQuiz();
         }
-        window.onload = () => {
-    alert("【高知クエストへようこそ】\n\n・青いピンは「地名」の難読クイズ\n・赤いピンは「歴史や観光」のクイズぜよ！\n\n正解してピンを「金色」に染め上げ、全40個の秘宝を集めるがじゃ！");
-};
+
         function closeQuiz() {
             document.getElementById('quiz-modal').classList.add('hidden');
         }
+
+        window.onload = () => {
+            alert("【高知クエストへようこそ】\n\n・青いピンは「地名」の難読クイズ\n・赤いピンは「歴史や観光」のクイズぜよ！\n\n正解してピンを「金色」に染め上げ、全40個の秘宝を集めるがじゃ！");
+        };
     </script>
 </body>
 </html>
