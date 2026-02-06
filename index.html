@@ -58,6 +58,13 @@
         <p id="score" style="margin:5px 0 0 0; font-weight: bold;">獲得した秘宝: 0 / 40</p>
     </div>
 
+<div style="font-size: 0.85rem; line-height: 1.6; color: #fff;">
+            <div><span style="color: #3d85c6;">●</span> 青：難読地名クイズ</div>
+            <div><span style="color: #e06666;">●</span> 赤：歴史・文化クイズ</div>
+            <div><span style="color: #ffd700;">●</span> 金：クリア（秘宝獲得）</div>
+        </div>
+    </div>
+    
     <div id="map"></div>
 
     <div id="quiz-modal" class="hidden">
@@ -198,7 +205,9 @@
             }
             closeQuiz();
         }
-
+        window.onload = () => {
+    alert("【高知クエストへようこそ】\n\n・青いピンは「地名」の難読クイズ\n・赤いピンは「歴史や観光」のクイズぜよ！\n\n正解してピンを「金色」に染め上げ、全40個の秘宝を集めるがじゃ！");
+};
         function closeQuiz() {
             document.getElementById('quiz-modal').classList.add('hidden');
         }
