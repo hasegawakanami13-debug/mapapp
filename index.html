@@ -58,12 +58,6 @@
         <p id="score" style="margin:5px 0 0 0; font-weight: bold;">獲得した秘宝: 0 / 40</p>
     </div>
 
-    <div id="legend">
-    <div><span style="color: #3d85c6;">●</span> 青：難読地名クイズ</div>
-    <div><span style="color: #e06666;">●</span> 赤：歴史・文化クイズ</div>
-    <div><span style="color: #ffd700;">●</span> 金：クリア（秘宝獲得）</div>
-</div>
-    
     <div id="map"></div>
 
     <div id="quiz-modal" class="hidden">
@@ -77,8 +71,19 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const kochiBounds = [[32.3, 132.0], [34.2, 134.8]];
+        const japanBounds = [[20.0, 122.0], [50.0, 154.0]];
 
+const map = L.map('map', {
+    tap: true,
+    zoomControl: false,
+    // maxBounds: japanBounds, // 必要に応じて有効化
+    minZoom: 4,
+    maxZoom: 18
+}).setView([36.0, 137.5], 5); // 日本全体が見える座標とズーム
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+}).addTo(map);
         const map = L.map('map', {
             tap: true,
             zoomControl: false,
