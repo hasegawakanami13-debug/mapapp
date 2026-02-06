@@ -71,13 +71,12 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 日本全体を表示する設定（重複を削除し一本化）
-        const map = L.map('map', {
-            tap: true,
-            zoomControl: false,
-            minZoom: 4,
-            maxZoom: 18
-        }).setView([36.0, 137.5], 5); 
+       const map = L.map('map', {
+    tap: true,
+    zoomControl: false,
+    minZoom: 4,
+    maxZoom: 18
+}).setView([33.35, 133.4], 9); // 高知県が中心にくる設定
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
