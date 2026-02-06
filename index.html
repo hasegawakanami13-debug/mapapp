@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>高知クエスト - 幕末・歴史探索編</title>
+    <title>高知クエスト</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #aad3df; }
@@ -55,7 +55,7 @@
 
     <div id="ui-layer">
         <h2 style="margin:0;">🗡️ 高知クエスト</h2>
-        <p id="score" style="margin:5px 0 0 0; font-weight: bold;">獲得した秘宝: 0 / 35</p>
+        <p id="score" style="margin:5px 0 0 0; font-weight: bold;">獲得した秘宝: 0 / 40</p>
     </div>
 
     <div id="map"></div>
@@ -194,7 +194,8 @@
                 score++;
                 document.getElementById('score').innerText = `獲得した秘宝: ${score} / ${questSpots.length}`;
             } else {
-                alert("ハズレ！学び直して出直しちや！");
+                // ハズレた時に正解を表示するように修正
+                alert(`ハズレ！残念やったねぇ。\n正解は「${correctAns}」ぜよ！\n学び直して出直しちや！`);
             }
             closeQuiz();
         }
