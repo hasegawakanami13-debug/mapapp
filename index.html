@@ -10,12 +10,36 @@
         body, html, button { 
             margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; 
             font-family: 'DotGothic16', sans-serif;
-            cursor: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur'), auto;
+            cursor: crosshair; /* レトロゲーム風に十字カーソル */
         }
 
+        /* 地図をドット風にする */
         .leaflet-tile { image-rendering: pixelated !important; }
         #map { height: 100vh; width: 100%; z-index: 1; background: #aad3df; }
 
+        /* --- 宝箱アイコンをCSSで作る（画像不要） --- */
+        .pixel-box {
+            width: 24px; height: 24px;
+            border: 3px solid #000;
+            box-shadow: 2px 2px 0 #000;
+            position: relative;
+        }
+        /* 閉じた宝箱（赤） */
+        .box-red { background: #e63946; border-color: #550000; }
+        /* 閉じた宝箱（青） */
+        .box-blue { background: #457b9d; border-color: #001d3d; }
+        /* 開いた宝箱（金） */
+        .box-gold { background: #ffd700; border-color: #b8860b; }
+        .box-gold::after {
+            content: "✨"; position: absolute; top: -15px; left: 0; font-size: 12px;
+        }
+        /* 共通の鍵穴パーツ */
+        .pixel-box::before {
+            content: ""; position: absolute; top: 8px; left: 8px;
+            width: 4px; height: 4px; background: #000;
+        }
+
+        /* UIレイヤー */
         #ui-layer {
             position: absolute; top: 15px; left: 15px; z-index: 100;
             background: rgba(0, 0, 0, 0.85); color: #ffd700;
@@ -29,34 +53,28 @@
             background: #ffd700; color: #000; text-shadow: none;
         }
 
+        /* ツールチップ（★と名前）の強制表示 */
         .custom-tooltip {
             background: #000 !important; color: #ffd700 !important;
             border: 2px solid #ffd700 !important; font-family: 'DotGothic16', sans-serif !important;
             font-size: 14px !important; text-shadow: 1px 1px 0 #000;
-            border-radius: 0px !important; box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
-            image-rendering: pixelated;
+            border-radius: 0px !important; opacity: 1 !important;
+            visibility: visible !important;
         }
 
-        .rank-up-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 2000;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .rank-card {
-            border: 6px double #ffd700; padding: 40px; background: #1a1a1a;
-            text-shadow: 3px 3px 0 #000; color: #ffd700; text-align: center;
-        }
-
-        #quiz-modal {
+        /* クイズ・ランク画面 */
+        .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 1000;
             display: flex; justify-content: center; align-items: center;
         }
-        .quiz-content {
-            background: #fffbe6; color: #333; padding: 30px;
+        .modal-card {
+            background: #fffbe6; color: #333; padding: 25px;
             border: 6px double #8b4513; width: 85%; max-width: 400px;
             text-align: center;
         }
+        .dark-card { background: #1a1a1a; color: #ffd700; border-color: #ffd700; }
+        
         .option-btn {
             display: block; width: 100%; margin: 12px 0; padding: 15px;
             background: #2a5d9a; color: white; border: 4px solid #000; 
@@ -65,7 +83,6 @@
         }
 
         .hidden { display: none !important; }
-        .pixel-icon { image-rendering: pixelated; }
     </style>
 </head>
 <body>
@@ -79,21 +96,21 @@
 
     <div id="map"></div>
 
-    <div id="rank-modal" class="rank-up-overlay hidden" onclick="this.classList.add('hidden')">
-        <div class="rank-card">
+    <div id="rank-modal" class="overlay hidden" onclick="this.classList.add('hidden')">
+        <div class="modal-card dark-card">
             <div style="font-size: 1.2rem;">*** ランクアップ ***</div>
-            <div id="rank-display" style="font-size: 2.5rem; color:#fff; margin:20px 0;"></div>
-            <div id="ijin-talk" style="color: #ffa500; line-height: 1.6; white-space: pre-wrap;"></div>
-            <p style="font-size: 0.9rem; color: #888; margin-top: 30px;">(クリックで閉じる)</p>
+            <div id="rank-display" style="font-size: 2.2rem; color:#fff; margin:15px 0;"></div>
+            <div id="ijin-talk" style="color: #ffa500; line-height: 1.4; white-space: pre-wrap;"></div>
+            <p style="font-size: 0.8rem; color: #888; margin-top: 20px;">(画面をタップして閉じる)</p>
         </div>
     </div>
 
-    <div id="quiz-modal" class="hidden">
-        <div class="quiz-content">
-            <h2 id="quiz-spot-name" style="color: #2a5d9a; margin-top: 0;"></h2>
-            <p id="quiz-question" style="margin-bottom: 20px; font-weight: bold;"></p>
+    <div id="quiz-modal" class="overlay hidden">
+        <div class="modal-card">
+            <h2 id="quiz-spot-name" style="color: #2a5d9a; margin-top: 0; font-size: 1.2rem;"></h2>
+            <p id="quiz-question" style="margin-bottom: 15px; font-weight: bold;"></p>
             <div id="quiz-options"></div>
-            <button onclick="closeQuiz()" style="margin-top:20px; background:none; border:none; color:gray; text-decoration:underline; font-family: 'DotGothic16'; cursor:pointer;">逃げる</button>
+            <button onclick="closeQuiz()" style="margin-top:15px; background:none; border:none; color:gray; text-decoration:underline; font-family: 'DotGothic16';">逃げる</button>
         </div>
     </div>
 
@@ -107,21 +124,15 @@
 
         let score = 0;
 
-        // 【修正】ドット絵の「宝箱」アイコン（外部フリー素材）
-        const boxClosedBlue = L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/the-muda-organization/muda-game-assets/main/pixel-icons/chest-closed-blue.png', 
-            // ※代替URLとして宝箱っぽいドット絵を指定。リンク切れ対策でサイズ調整
-            iconUrl: 'https://img.icons8.com/pixel-point/64/0000FF/closed-chest.png',
-            iconSize: [32, 32], iconAnchor: [16, 32], className: 'pixel-icon'
-        });
-        const boxClosedRed = L.icon({
-            iconUrl: 'https://img.icons8.com/pixel-point/64/FF0000/closed-chest.png',
-            iconSize: [32, 32], iconAnchor: [16, 32], className: 'pixel-icon'
-        });
-        const boxOpenGold = L.icon({
-            iconUrl: 'https://img.icons8.com/pixel-point/64/FFD700/opened-chest.png',
-            iconSize: [32, 32], iconAnchor: [16, 32], className: 'pixel-icon'
-        });
+        // --- アイコンをCSSで作る関数 ---
+        function createBoxIcon(type) {
+            return L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="pixel-box box-${type}"></div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+        }
 
         const questSpots = [
             { name: "高知市・鵜来巣", level: "★3", pos: [33.5420, 133.5120], q: "【難読地名】「鵜来巣」の読み方は？", ops: ["うぐるす", "うきす", "うこす"], ans: "うぐるす", solved: false },
@@ -166,19 +177,20 @@
             { name: "魚梁瀬森林鉄道", level: "★3", pos: [33.6210, 134.1105], q: "機関車の愛称は？", ops: ["りんてつ", "しんたろう号", "土佐号"], ans: "しんたろう号", solved: false }
         ];
 
+        // 初期配置
         questSpots.forEach((spot, index) => {
             const isNandoku = spot.q.includes("難読");
-            const markerIcon = isNandoku ? boxClosedBlue : boxClosedRed;
-            const marker = L.marker(spot.pos, { icon: markerIcon }).addTo(map);
+            const boxType = isNandoku ? "blue" : "red";
+            
+            const marker = L.marker(spot.pos, { icon: createBoxIcon(boxType) }).addTo(map);
             spot.marker = marker;
             
             marker.bindTooltip(`<b>${spot.level} ${spot.name}</b>`, {
-                direction: 'top', offset: [0, -25], className: 'custom-tooltip'
+                direction: 'top', offset: [0, -10], className: 'custom-tooltip', permanent: false
             });
 
             marker.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
-                // すでに解いている場合はメッセージのみ
                 if (spot.solved) {
                     alert("この秘宝はすでに手に入れたぜよ！");
                 } else {
@@ -207,12 +219,11 @@
             const spot = questSpots[index];
             if (userAns === correctAns) {
                 alert("正解！秘宝ゲットぜよ！");
-                // 【修正】solvedフラグをチェックして二重カウント防止
                 if (!spot.solved) {
                     score++;
-                    spot.solved = true; // 解決済みにする
+                    spot.solved = true;
                     updateUI();
-                    spot.marker.setIcon(boxOpenGold); // アイコンを開いた金の宝箱に
+                    spot.marker.setIcon(createBoxIcon("gold")); // 金色の開いた宝箱に変更
                     if (score % 10 === 0 && score > 0) showRankUpEffect(score);
                 }
             } else {
@@ -221,28 +232,25 @@
             closeQuiz();
         }
 
-        function getRankName(s) {
-            if (s >= 40) return "土佐の英雄";
-            if (s >= 30) return "維新の志士";
-            if (s >= 20) return "期待の若武者";
-            if (s >= 10) return "土佐の足軽";
-            return "土佐の旅人";
-        }
-
         function updateUI() {
             document.getElementById('score').innerText = `秘宝: ${score} / 40`;
-            document.getElementById('current-rank').innerText = getRankName(score);
+            const ranks = ["土佐の旅人", "土佐の足軽", "期待の若武者", "維新の志士", "土佐の英雄"];
+            const rankIdx = Math.min(Math.floor(score / 10), 4);
+            document.getElementById('current-rank').innerText = ranks[rankIdx];
         }
 
         function showRankUpEffect(currentScore) {
             const rankDisplay = document.getElementById('rank-display');
             const ijinTalk = document.getElementById('ijin-talk');
-            let rank = getRankName(currentScore);
+            const ranks = ["土佐の旅人", "土佐の足軽", "期待の若武者", "維新の志士", "土佐の英雄"];
+            const rank = ranks[Math.floor(currentScore / 10)];
+            
             let msg = "";
             if (currentScore === 10) msg = "ジョン万次郎：\n「Amazing! その調子で高知を知るがじゃ！まだまだ修行中ぜよ！」";
             else if (currentScore === 20) msg = "板垣退助：\n「おんしゃあの知識は死なず！自由の道を進むがじゃ！」";
             else if (currentScore === 30) msg = "中岡慎太郎：\n「ええぞ、熱い魂を感じるき。日本の夜明けは近いぜよ！」";
             else if (currentScore === 40) msg = "坂本龍馬：\n「まっこと感服したぜよ。おんしゃあこそが、真の高知マスターじゃ！」";
+            
             rankDisplay.innerText = rank;
             ijinTalk.innerText = msg;
             document.getElementById('rank-modal').classList.remove('hidden');
