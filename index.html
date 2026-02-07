@@ -110,24 +110,24 @@
 
         let score = 0;
 
-      const boxClosedBlue = L.icon({
-            iconUrl: 'blue.png', // ./img/ を削除
-            iconSize: [44, 44],
-            iconAnchor: [22, 40],
+    const boxClosedBlue = L.icon({
+            iconUrl: 'blue.png', 
+            iconSize: [28, 28],       // 青はかなり大きく見えるので大幅にカット
+            iconAnchor: [14, 24], 
             className: 'pixel-icon'
         });
 
         const boxClosedRed = L.icon({
-            iconUrl: 'red.png', // ./img/ を削除
-            iconSize: [44, 44],
-            iconAnchor: [22, 40],
+            iconUrl: 'red.png', 
+            iconSize: [48, 48],       // 赤は余白が多いため数値を大きく設定
+            iconAnchor: [24, 42],
             className: 'pixel-icon'
         });
 
         const boxOpenGold = L.icon({
-            iconUrl: 'gold.png', // ./img/ を削除
-            iconSize: [50, 50],
-            iconAnchor: [25, 45],
+            iconUrl: 'gold.png', 
+            iconSize: [54, 54],       // 金も余白に合わせてさらに大きく
+            iconAnchor: [32, 52],
             className: 'pixel-icon'
         });
 
