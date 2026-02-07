@@ -258,9 +258,18 @@
 
         function closeQuiz() { document.getElementById('quiz-modal').classList.add('hidden'); }
         
-        window.onload = () => { 
+      window.onload = () => { 
             initMarkers();
-            alert("【高知クエスト】\n\n正解して全40個の秘宝を集めるがじゃ！"); 
+            alert(
+                "【高知クエスト】\n\n" +
+                "正解して全40個の秘宝を集めるがじゃ！\n\n" +
+                "▼宝箱の色について\n" +
+                "🟦 青の箱：地名の読み方（難読地名）\n" +
+                "🟥 赤の箱：歴史や観光スポットの知識\n\n" +
+                "▼難易度について\n" +
+                "★1：初級　★2：中級　★3：上級（激ムズ）\n\n" +
+                "準備はええか？いざ、土佐の旅へ出発ぜよ！"
+            ); 
         };
     </script>
 </body>
