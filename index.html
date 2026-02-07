@@ -29,15 +29,6 @@
             background: #ffd700; color: #000; text-shadow: none;
         }
 
-        /* BGMボタンのスタイルをここに追加 */
-        #bgm-btn {
-            position: absolute; bottom: 20px; right: 20px; z-index: 1000;
-            background: rgba(0, 0, 0, 0.8); color: #ffd700;
-            border: 3px solid #ffd700; padding: 10px;
-            font-family: 'DotGothic16', sans-serif; cursor: pointer;
-            box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
-        }
-
         .custom-tooltip {
             background: #000 !important; color: #ffd700 !important;
             border: 2px solid #ffd700 !important; font-family: 'DotGothic16', sans-serif !important;
@@ -89,11 +80,6 @@
         <span id="current-rank">土佐の旅人</span>
     </div>
 
-    <button id="bgm-btn" onclick="toggleBGM()">🎵 BGM ON/OFF</button>
-    <audio id="game-bgm" loop>
-        <source src="https://maoudamashii.jokersounds.com/music/game/mp3/bgm_maoudamashii_8bit18.mp3" type="audio/mp3">
-    </audio>
-
     <div id="map"></div>
 
     <div id="rank-modal" class="rank-up-overlay hidden" onclick="this.classList.add('hidden')">
@@ -124,14 +110,6 @@
 
         let score = 0;
 
-        // BGM制御用のJavaScriptを追加
-        const bgm = document.getElementById('game-bgm');
-        let isPlaying = false;
-        function toggleBGM() {
-            if (isPlaying) { bgm.pause(); } 
-            else { bgm.play(); }
-            isPlaying = !isPlaying;
-        }
 // すべてのアイコンで共通の「基準サイズ」と「中心点」を適用します
         const boxClosedBlue = L.icon({
             iconUrl: 'blue.png', 
