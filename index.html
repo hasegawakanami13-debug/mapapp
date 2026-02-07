@@ -16,21 +16,43 @@
             padding: 15px; border: 2px solid #ffd700; border-radius: 8px;
             font-family: 'Hiragino Kaku Gothic ProN', sans-serif;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            min-width: 180px;
         }
 
-        /* ツールチップ（ホバー時のデザイン） */
+        /* ランク表示の強調設定 */
+        #current-rank {
+            display: block;
+            margin-top: 5px;
+            padding: 2px 8px;
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 4px;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        /* ランクアップ演出用のスタイル */
+        .rank-up-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+            color: #ffd700; text-align: center; font-family: 'Hiragino Kaku Gothic ProN', sans-serif;
+        }
+        .rank-card {
+            border: 4px solid #ffd700; padding: 40px; border-radius: 20px;
+            background: #1a1a1a; max-width: 80%;
+        }
+        .rank-title { font-size: 1.2rem; color: #fff; margin-bottom: 10px; }
+        .rank-name { font-size: 2.5rem; font-weight: bold; margin: 20px 0; text-shadow: 0 0 10px #ffd700; }
+        .ijin-msg { font-style: italic; color: #ffa500; font-size: 1.1rem; margin-top: 20px; line-height: 1.6; }
+
         .custom-tooltip {
             background: rgba(0, 0, 0, 0.9) !important;
             color: #ffd700 !important;
             border: 1px solid #ffd700 !important;
-            font-weight: bold;
-            font-size: 13px;
-            padding: 5px 10px;
-            border-radius: 4px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            font-weight: bold; font-size: 13px; padding: 5px 10px;
+            border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
 
-        /* クイズ画面 */
         #quiz-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 1000;
@@ -55,10 +77,21 @@
 
     <div id="ui-layer">
         <h2 style="margin:0;">🗡️ 高知クエスト</h2>
-        <p id="score" style="margin:5px 0 0 0; font-weight: bold;">獲得した秘宝: 0 / 40</p>
+        <p id="score" style="margin:8px 0 0 0; font-weight: bold;">獲得した秘宝: 0 / 40</p>
+        <p style="margin:8px 0 0 0; font-size: 0.8rem; color: #ffd700;">現在の称号：</p>
+        <span id="current-rank">土佐の旅人</span>
     </div>
 
     <div id="map"></div>
+
+    <div id="rank-modal" class="rank-up-overlay hidden" onclick="this.classList.add('hidden')">
+        <div class="rank-card">
+            <div class="rank-title">ーー ランクアップ ーー</div>
+            <div id="rank-display" class="rank-name"></div>
+            <div id="ijin-talk" class="ijin-msg"></div>
+            <p style="font-size: 0.8rem; color: #888; margin-top: 30px;">(画面をタップして閉じる)</p>
+        </div>
+    </div>
 
     <div id="quiz-modal" class="hidden">
         <div class="quiz-content">
@@ -71,12 +104,9 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-       const map = L.map('map', {
-    tap: true,
-    zoomControl: false,
-    minZoom: 4,
-    maxZoom: 18
-}).setView([33.35, 133.4], 9); // 高知県が中心にくる設定
+        const map = L.map('map', {
+            tap: true, zoomControl: false, minZoom: 4, maxZoom: 18
+        }).setView([33.35, 133.4], 9);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
@@ -84,7 +114,6 @@
 
         let score = 0;
 
-        // アイコン定義
         const blueIcon = new L.Icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -138,7 +167,7 @@
             { name: "旧山内家下屋敷", level: "★2", pos: [33.5562, 133.5321], q: "幕末の土佐藩主、山内容容が自らを称した言葉は？", ops: ["鯨海酔侯", "土佐の虎", "酔いどれ大名"], ans: "鯨海酔侯" },
             { name: "龍河洞（神の壺）", level: "★3", pos: [33.6033, 133.7436], q: "約2000年前に置かれた土器が鍾乳石に取り込まれた世界唯一の遺物は？", ops: ["神の壺", "時の器", "石の皿"], ans: "神の壺" },
             { name: "安居渓谷", level: "★2", pos: [33.6335, 133.1512], q: "仁淀ブルーが最も濃く見えると言われる場所は？", ops: ["水晶淵", "にこ淵", "中津渓谷"], ans: "水晶淵" },
-            { name: "桂浜", level: "★1", pos: [33.4971, 133.5744], q: "月の名所として有名な桂浜。坂本龍馬像が見つめている方向は？", ops: ["太平洋（海）", "高知城", "富士山"], ans: "太平洋（海）" },
+            { name: "桂浜", level: "★1", pos: [33.4971, 133.5744], q: "月の名名所として有名な桂浜。坂本龍馬像が見つめている方向は？", ops: ["太平洋（海）", "高知城", "富士山"], ans: "太平洋（海）" },
             { name: "四万十川・佐田沈下橋", level: "★1", pos: [32.9984, 132.9333], q: "四万十川に沈下橋が多い理由は？", ops: ["増水時に橋が壊れないため", "安く作るため", "飛び込むため"], ans: "増水時に橋が壊れないため" },
             { name: "室戸岬・灯台", level: "★2", pos: [33.2472, 134.1751], q: "日本最大級のレンズを持つ室戸岬灯台。そのレンズの直径は？", ops: ["2.6m", "1.0m", "5.0m"], ans: "2.6m" },
             { name: "鳴無神社", level: "★3", pos: [33.4358, 133.3985], q: "「土佐の宮島」と呼ばれ、参道が海に向かって伸びている神社は？", ops: ["鳴無（おとなし）神社", "土佐神社", "朝倉神社"], ans: "鳴無（おとなし）神社" },
@@ -146,18 +175,14 @@
             { name: "安芸・しんたろう（魚梁瀬）", level: "★3", pos: [33.6210, 134.1105], q: "かつて木材運搬で活躍した、魚梁瀬森林鉄道の愛称は？", ops: ["りんてつ", "しんたろう号", "土佐号"], ans: "しんたろう号" }
         ];
 
-        // マーカーの設置
         questSpots.forEach((spot, index) => {
             const isNandoku = spot.q.includes("難読地名");
             const markerIcon = isNandoku ? blueIcon : redIcon;
-
             const marker = L.marker(spot.pos, { icon: markerIcon }).addTo(map);
-            spot.marker = marker; 
-
+            spot.marker = marker;
             marker.bindTooltip(`<b>${spot.name}</b><br>難易度：${spot.level}`, {
                 direction: 'top', offset: [0, -10], className: 'custom-tooltip'
             });
-
             marker.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
                 openQuiz(index);
@@ -184,12 +209,51 @@
             if (userAns === correctAns) {
                 alert("正解！秘宝ゲットぜよ！");
                 score++;
-                document.getElementById('score').innerText = `獲得した秘宝: ${score} / ${questSpots.length}`;
+                updateUI();
                 questSpots[index].marker.setIcon(goldIcon);
+
+                if (score % 10 === 0 && score > 0) {
+                    showRankUpEffect(score);
+                }
             } else {
                 alert(`ハズレ！残念やったねぇ。\n正解は「${correctAns}」ぜよ！\n学び直して出直しちや！`);
             }
             closeQuiz();
+        }
+
+        // ランクの名前を返す補助関数
+        function getRankName(s) {
+            if (s >= 40) return "土佐の英雄";
+            if (s >= 30) return "維新の志士";
+            if (s >= 20) return "期待の若武者";
+            if (s >= 10) return "土佐の足軽";
+            return "土佐の旅人";
+        }
+
+        function updateUI() {
+            document.getElementById('score').innerText = `獲得した秘宝: ${score} / ${questSpots.length}`;
+            document.getElementById('current-rank').innerText = getRankName(score);
+        }
+
+        function showRankUpEffect(currentScore) {
+            const rankDisplay = document.getElementById('rank-display');
+            const ijinTalk = document.getElementById('ijin-talk');
+            let rank = getRankName(currentScore);
+            let msg = "";
+
+            if (currentScore === 10) {
+                msg = "ジョン万次郎：\n「Amazing! その調子で世界、いや高知を知るがじゃ！まだまだ修行中ぜよ！」";
+            } else if (currentScore === 20) {
+                msg = "板垣退助：\n「おんしゃあの知識は死なず！自由の道を進むがじゃ！土佐の山間より自由の風が吹いてきたき！」";
+            } else if (currentScore === 30) {
+                msg = "中岡慎太郎：\n「ええぞ、熱い魂を感じるき。龍馬のところまであと少しぜよ！日本の夜明けは近いぜよ！」";
+            } else if (currentScore === 40) {
+                msg = "坂本龍馬：\n「まっこと感服したぜよ。おんしゃあこそが、真の高知マスターじゃ！おんしゃあ、まっこと最高傑作の名君ぜよ！」";
+            }
+
+            rankDisplay.innerText = rank;
+            ijinTalk.innerText = msg;
+            document.getElementById('rank-modal').classList.remove('hidden');
         }
 
         function closeQuiz() {
