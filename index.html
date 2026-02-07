@@ -132,28 +132,27 @@
             else { bgm.play(); }
             isPlaying = !isPlaying;
         }
-
-    const boxClosedBlue = L.icon({
+// すべてのアイコンで共通の「基準サイズ」と「中心点」を適用します
+        const boxClosedBlue = L.icon({
             iconUrl: 'blue.png', 
-            iconSize: [37, 37],
-            iconAnchor: [14, 24], 
+            iconSize: [45, 45],       // 共通サイズ
+            iconAnchor: [22, 40],     // 共通の中心点（足元を基準）
             className: 'pixel-icon'
         });
 
         const boxClosedRed = L.icon({
             iconUrl: 'red.png', 
-            iconSize: [48, 48],
-            iconAnchor: [24, 42],
+            iconSize: [45, 45],       // 共通サイズ
+            iconAnchor: [22, 40],     // 共通の中心点
             className: 'pixel-icon'
         });
 
         const boxOpenGold = L.icon({
             iconUrl: 'gold.png', 
-            iconSize: [51, 51],
-            iconAnchor: [32, 52],
+            iconSize: [45, 45],       // 共通サイズ
+            iconAnchor: [22, 40],     // 共通の中心点
             className: 'pixel-icon'
         });
-
         const questSpots = [
             { name: "高知市・鵜来巣", level: "★3", pos: [33.5420, 133.5120], q: "【難読地名】「鵜来巣」の読み方は？", ops: ["うぐるす", "うきす", "うこす"], ans: "うぐるす", solved: false },
             { name: "高知市・高埇", level: "★3", pos: [33.5710, 133.5580], q: "【難読地名】「高埇」の読み方は？", ops: ["たかそね", "たかおけ", "たかはた"], ans: "たかそね", solved: false },
