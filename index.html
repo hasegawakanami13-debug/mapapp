@@ -3,30 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>高知クエスト - DOT PIXEL EDITION</title>
+    <title>高知クエスト - PIXEL TREASURE</title>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body, html, button { 
             margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; 
             font-family: 'DotGothic16', sans-serif;
-            cursor: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur'), auto; /* カーソルを剣に */
+            cursor: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur'), auto;
         }
 
-        /* 地図をドット風にする */
-        .leaflet-tile {
-            image-rendering: pixelated !important;
-        }
+        .leaflet-tile { image-rendering: pixelated !important; }
         #map { height: 100vh; width: 100%; z-index: 1; background: #aad3df; }
 
-        /* UIレイヤー */
         #ui-layer {
             position: absolute; top: 15px; left: 15px; z-index: 100;
             background: rgba(0, 0, 0, 0.85); color: #ffd700;
             padding: 15px; border: 4px solid #ffd700;
             box-shadow: 6px 6px 0px rgba(0,0,0,0.5);
-            min-width: 180px;
-            text-shadow: 2px 2px 0 #000;
+            min-width: 180px; text-shadow: 2px 2px 0 #000;
         }
 
         #current-rank {
@@ -34,20 +29,14 @@
             background: #ffd700; color: #000; text-shadow: none;
         }
 
-        /* ツールチップ（星の表示）の復元とドット化 */
         .custom-tooltip {
-            background: #000 !important;
-            color: #ffd700 !important;
-            border: 2px solid #ffd700 !important;
-            font-family: 'DotGothic16', sans-serif !important;
-            font-size: 14px !important;
-            text-shadow: 1px 1px 0 #000;
-            border-radius: 0px !important;
-            box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+            background: #000 !important; color: #ffd700 !important;
+            border: 2px solid #ffd700 !important; font-family: 'DotGothic16', sans-serif !important;
+            font-size: 14px !important; text-shadow: 1px 1px 0 #000;
+            border-radius: 0px !important; box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
             image-rendering: pixelated;
         }
 
-        /* ランクアップ演出 */
         .rank-up-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 2000;
@@ -55,10 +44,9 @@
         }
         .rank-card {
             border: 6px double #ffd700; padding: 40px; background: #1a1a1a;
-            text-shadow: 3px 3px 0 #000; color: #ffd700;
+            text-shadow: 3px 3px 0 #000; color: #ffd700; text-align: center;
         }
 
-        /* クイズ画面 */
         #quiz-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 1000;
@@ -77,11 +65,7 @@
         }
 
         .hidden { display: none !important; }
-
-        /* アイコンをドットっぽく見せるためのCSS */
-        .pixel-icon {
-            image-rendering: pixelated;
-        }
+        .pixel-icon { image-rendering: pixelated; }
     </style>
 </head>
 <body>
@@ -99,7 +83,7 @@
         <div class="rank-card">
             <div style="font-size: 1.2rem;">*** ランクアップ ***</div>
             <div id="rank-display" style="font-size: 2.5rem; color:#fff; margin:20px 0;"></div>
-            <div id="ijin-talk" style="color: #ffa500; line-height: 1.6;"></div>
+            <div id="ijin-talk" style="color: #ffa500; line-height: 1.6; white-space: pre-wrap;"></div>
             <p style="font-size: 0.9rem; color: #888; margin-top: 30px;">(クリックで閉じる)</p>
         </div>
     </div>
@@ -123,78 +107,83 @@
 
         let score = 0;
 
-        // ドット絵アイコンの定義
-        // 未クリア（青・赤）を「閉じた宝箱」、クリア後（金）を「開いた宝箱」風にします
-        const dotBlueIcon = L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/dusk-ball.png', // ドット絵の玉
+        // 【修正】ドット絵の「宝箱」アイコン（外部フリー素材）
+        const boxClosedBlue = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/the-muda-organization/muda-game-assets/main/pixel-icons/chest-closed-blue.png', 
+            // ※代替URLとして宝箱っぽいドット絵を指定。リンク切れ対策でサイズ調整
+            iconUrl: 'https://img.icons8.com/pixel-point/64/0000FF/closed-chest.png',
             iconSize: [32, 32], iconAnchor: [16, 32], className: 'pixel-icon'
         });
-        const dotRedIcon = L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/cherish-ball.png', // ドット絵の玉
+        const boxClosedRed = L.icon({
+            iconUrl: 'https://img.icons8.com/pixel-point/64/FF0000/closed-chest.png',
             iconSize: [32, 32], iconAnchor: [16, 32], className: 'pixel-icon'
         });
-        const dotGoldIcon = L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png', // 秘宝っぽいドット
+        const boxOpenGold = L.icon({
+            iconUrl: 'https://img.icons8.com/pixel-point/64/FFD700/opened-chest.png',
             iconSize: [32, 32], iconAnchor: [16, 32], className: 'pixel-icon'
         });
 
-       const questSpots = [
-            { name: "高知市・鵜来巣", level: "★3", pos: [33.5420, 133.5120], q: "【難読地名】「鵜来巣」の読み方は？", ops: ["うぐるす", "うきす", "うこす"], ans: "うぐるす" },
-            { name: "高知市・高埇", level: "★3", pos: [33.5710, 133.5580], q: "【難読地名】「高埇」の読み方は？", ops: ["たかそね", "たかおけ", "たかはた"], ans: "たかそね" },
-            { name: "高知市・尾立", level: "★2", pos: [33.5950, 133.5300], q: "【難読地名】「尾立」の読み方は？", ops: ["ひじり", "おだち", "おたて"], ans: "ひじり" },
-            { name: "高知市・初月", level: "★3", pos: [33.5850, 133.5200], q: "【難読地名】「初月」の読み方は？", ops: ["みかづき", "はづき", "ういづき"], ans: "みかづき" },
-            { name: "安芸市・別役", level: "★2", pos: [33.5500, 133.9500], q: "【難読地名】「別役」の読み方は？", ops: ["べっちゃく", "べつやく", "わかれやく"], ans: "べっちゃく" },
-            { name: "南国市・岡豊町", level: "★2", pos: [33.5930, 133.6062], q: "【難読地名】「岡豊」の読み方は？（長宗我部氏の本拠地）", ops: ["おこう", "おかゆたか", "おかとよ"], ans: "おこう" },
-            { name: "香美市・五百蔵", level: "★3", pos: [33.6700, 133.7800], q: "【難読地名】「五百蔵」の読み方は？", ops: ["いおろい", "いおくら", "ごひゃくぐら"], ans: "いおろい" },
-            { name: "田野町・淌濤", level: "★3", pos: [33.4300, 134.0100], q: "【難読地名】「淌濤」の読み方は？", ops: ["しょうとう", "なお", "なみ"], ans: "しょうとう" },
-            { name: "馬路村・魚梁瀬", level: "★3", pos: [33.6300, 134.1100], q: "【難読地名】「魚梁瀬」の読み方は？", ops: ["やなせ", "ぎょりょうぜ", "うおやなせ"], ans: "やなせ" },
-            { name: "宿毛市・宿毛", level: "★1", pos: [32.9400, 132.7200], q: "【難読地名】「宿毛」の読み方は？", ops: ["すくも", "しゅくもう", "やどげ"], ans: "すくも" },
-            { name: "土佐清水市・鍵掛", level: "★2", pos: [32.7800, 132.9500], q: "【難読地名】「鍵掛」の読み方は？", ops: ["かいかけ", "かぎかけ", "けんがい"], ans: "かいかけ" },
-            { name: "四万十市・秋田", level: "★3", pos: [32.9500, 132.9300], q: "【難読地名】「秋田」の読み方は？", ops: ["あいだ", "あきた", "しゅうでん"], ans: "あいだ" },
-            { name: "大豊町・粟生", level: "★3", pos: [33.7800, 133.6800], q: "【難読地名】「粟生」の読み方は？", ops: ["あおう", "あわお", "あわなま"], ans: "あおう" },
-            { name: "土佐町・溜井", level: "★3", pos: [33.7500, 133.5500], q: "【難読地名】「溜井」の読み方は？", ops: ["ゆるい", "ためい", "りゅうせい"], ans: "ゆるい" },
-            { name: "いの町・井流", level: "★3", pos: [33.5500, 133.4000], q: "【難読地名】「井流」の読み方は？", ops: ["ゆる", "いりゅう", "いながれ"], ans: "ゆる" },
-            { name: "梼原町・上成", level: "★3", pos: [33.4600, 132.9000], q: "【難読地名】「上成」の読み方は？", ops: ["うわなろ", "うえなり", "かみしげ"], ans: "うわなろ" },
-            { name: "四万十町・天ノ川", level: "★1", pos: [33.2200, 133.0500], q: "【難読地名】「天ノ川」の読み方は？", ops: ["あまのがわ", "てんのかわ", "あいがわ"], ans: "あまのがわ" },
-            { name: "日高村・赤汢", level: "★3", pos: [33.5400, 133.3500], q: "【難読地名】「赤汢」の読み方は？", ops: ["あかぬた", "あかしお", "あかどろ"], ans: "あかぬた" },
-            { name: "黒潮町・浮鞭", level: "★2", pos: [33.0300, 133.0100], q: "【難読地名】「浮鞭」の読み方は？", ops: ["うきぶち", "うきむち", "ふべん"], ans: "うきぶち" },
-            { name: "坂本龍馬誕生地", level: "★1", pos: [33.5614, 133.5285], q: "坂本龍馬が生まれた上町のこの場所、現在は何が立っている？", ops: ["記念碑", "銅像", "実物大の家"], ans: "記念碑" },
-            { name: "中岡慎太郎像（室戸）", level: "★2", pos: [33.2482, 134.1755], q: "龍馬と共に近江屋で倒れた中岡慎太郎。彼の出身地はどこの村？", ops: ["北川村", "馬路村", "芸西村"], ans: "北川村" },
-            { name: "武市半平太旧宅", level: "★3", pos: [33.5786, 133.5855], q: "土佐勤王党を組織した武市半平太の号（ペンネーム）は？", ops: ["瑞山", "南冥", "雅楽"], ans: "瑞山" },
-            { name: "岩崎弥太郎生家", level: "★2", pos: [33.5215, 133.9212], q: "三菱財閥の創始者、岩崎弥太郎。彼の家紋が今の三菱マークの由来になった？", ops: ["本当", "嘘"], ans: "本当" },
-            { name: "ジョン万次郎銅像", level: "★2", pos: [32.7245, 133.0195], q: "遭難後、アメリカの船に救われた万次郎が帰国後に伝えたスポーツは？", ops: ["野球", "テニス", "サッカー"], ans: "野球" },
-            { name: "近藤長次郎の碑", level: "★3", pos: [33.5650, 133.5350], q: "龍馬の右腕として活躍した長次郎。饅頭屋の息子だったことから何と呼ばれた？", ops: ["饅頭屋長次郎", "お菓子長次郎", "砂糖屋長次郎"], ans: "饅頭屋長次郎" },
-            { name: "岡豊山（長宗我部元親）", level: "★3", pos: [33.5930, 133.6062], q: "土佐を統一した長宗我部元親の居城があった場所は？", ops: ["岡豊城", "浦戸城", "朝倉城"], ans: "岡豊城" },
-            { name: "若宮八幡宮", level: "★3", pos: [33.5042, 133.5511], q: "長宗我部元親が初陣の際に必勝祈願をした神社は？", ops: ["若宮八幡宮", "潮江天満宮", "土佐神社"], ans: "若宮八幡宮" },
-            { name: "雪蹊寺", level: "★3", pos: [33.5028, 133.5505], q: "長宗我部氏の菩提寺。元親の幼名にちなんで名付けられた？", ops: ["本当", "嘘"], ans: "本当" },
-            { name: "板垣退助像", level: "★1", pos: [33.5601, 133.5312], q: "「板垣死すとも自由は死せず」で有名な板垣退助が作った政党は？", ops: ["自由党", "進歩党", "共産党"], ans: "自由党" },
-            { name: "高知市立自由民権記念館", level: "★2", pos: [33.5550, 133.5211], q: "高知は「民権運動のゆかりの地」として何と呼ばれている？", ops: ["自由は土佐の山間より", "平和の砦", "維新の里"], ans: "自由は土佐の山間より" },
-            { name: "播磨屋宗徳の墓", level: "★3", pos: [33.5600, 133.5430], q: "「はりまや橋」の名前の由来になった豪商の名前は？", ops: ["播磨屋", "土佐屋", "高知屋"], ans: "播磨屋" },
-            { name: "旧山内家下屋敷", level: "★2", pos: [33.5562, 133.5321], q: "幕末の土佐藩主、山内容容が自らを称した言葉は？", ops: ["鯨海酔侯", "土佐の虎", "酔いどれ大名"], ans: "鯨海酔侯" },
-            { name: "龍河洞（神の壺）", level: "★3", pos: [33.6033, 133.7436], q: "約2000年前に置かれた土器が鍾乳石に取り込まれた世界唯一の遺物は？", ops: ["神の壺", "時の器", "石の皿"], ans: "神の壺" },
-            { name: "安居渓谷", level: "★2", pos: [33.6335, 133.1512], q: "仁淀ブルーが最も濃く見えると言われる場所は？", ops: ["水晶淵", "にこ淵", "中津渓谷"], ans: "水晶淵" },
-            { name: "桂浜", level: "★1", pos: [33.4971, 133.5744], q: "月の名所として有名な桂浜。坂本龍馬像が見つめている方向は？", ops: ["太平洋（海）", "高知城", "富士山"], ans: "太平洋（海）" },
-            { name: "四万十川・佐田沈下橋", level: "★1", pos: [32.9984, 132.9333], q: "四万十川に沈下橋が多い理由は？", ops: ["増水時に橋が壊れないため", "安く作るため", "飛び込むため"], ans: "増水時に橋が壊れないため" },
-            { name: "室戸岬・灯台", level: "★2", pos: [33.2472, 134.1751], q: "日本最大級のレンズを持つ室戸岬灯台。そのレンズの直径は？", ops: ["2.6m", "1.0m", "5.0m"], ans: "2.6m" },
-            { name: "鳴無神社", level: "★3", pos: [33.4358, 133.3985], q: "「土佐の宮島」と呼ばれ、参道が海に向かって伸びている神社は？", ops: ["鳴無（おとなし）神社", "土佐神社", "朝倉神社"], ans: "鳴無（おとなし）神社" },
-            { name: "大歩危・小歩危", level: "★2", pos: [33.8955, 133.7612], q: "吉野川の激流で削られた岩石が美しい渓谷。名前の由来は？", ops: ["歩くのが危ないから", "大きな歩幅で歩くから", "景色が美しいから"], ans: "歩くのが危ないから" },
-            { name: "安芸・しんたろう（魚梁瀬）", level: "★3", pos: [33.6210, 134.1105], q: "かつて木材運搬で活躍した、魚梁瀬森林鉄道の愛称は？", ops: ["りんてつ", "しんたろう号", "土佐号"], ans: "しんたろう号" }
+        const questSpots = [
+            { name: "高知市・鵜来巣", level: "★3", pos: [33.5420, 133.5120], q: "【難読地名】「鵜来巣」の読み方は？", ops: ["うぐるす", "うきす", "うこす"], ans: "うぐるす", solved: false },
+            { name: "高知市・高埇", level: "★3", pos: [33.5710, 133.5580], q: "【難読地名】「高埇」の読み方は？", ops: ["たかそね", "たかおけ", "たかはた"], ans: "たかそね", solved: false },
+            { name: "高知市・尾立", level: "★2", pos: [33.5950, 133.5300], q: "【難読地名】「尾立」の読み方は？", ops: ["ひじり", "おだち", "おたて"], ans: "ひじり", solved: false },
+            { name: "高知市・初月", level: "★3", pos: [33.5850, 133.5200], q: "【難読地名】「初月」の読み方は？", ops: ["みかづき", "はづき", "ういづき"], ans: "みかづき", solved: false },
+            { name: "安芸市・別役", level: "★2", pos: [33.5500, 133.9500], q: "【難読地名】「別役」の読み方は？", ops: ["べっちゃく", "べつやく", "わかれやく"], ans: "べっちゃく", solved: false },
+            { name: "南国市・岡豊町", level: "★2", pos: [33.5930, 133.6062], q: "【難読地名】「岡豊」の読み方は？", ops: ["おこう", "おかゆたか", "おかとよ"], ans: "おこう", solved: false },
+            { name: "香美市・五百蔵", level: "★3", pos: [33.6700, 133.7800], q: "【難読地名】「五百蔵」の読み方は？", ops: ["いおろい", "いおくら", "ごひゃくぐら"], ans: "いおろい", solved: false },
+            { name: "田野町・淌濤", level: "★3", pos: [33.4300, 134.0100], q: "【難読地名】「淌濤」の読み方は？", ops: ["しょうとう", "なお", "なみ"], ans: "しょうとう", solved: false },
+            { name: "馬路村・魚梁瀬", level: "★3", pos: [33.6300, 134.1100], q: "【難読地名】「魚梁瀬」の読み方は？", ops: ["やなせ", "ぎょりょうぜ", "うおやなせ"], ans: "やなせ", solved: false },
+            { name: "宿毛市・宿毛", level: "★1", pos: [32.9400, 132.7200], q: "【難読地名】「宿毛」の読み方は？", ops: ["すくも", "しゅくもう", "やどげ"], ans: "すくも", solved: false },
+            { name: "土佐清水市・鍵掛", level: "★2", pos: [32.7800, 132.9500], q: "【難読地名】「鍵掛」の読み方は？", ops: ["かいかけ", "かぎかけ", "けんがい"], ans: "かいかけ", solved: false },
+            { name: "四万十市・秋田", level: "★3", pos: [32.9500, 132.9300], q: "【難読地名】「秋田」の読み方は？", ops: ["あいだ", "あきた", "しゅうでん"], ans: "あいだ", solved: false },
+            { name: "大豊町・粟生", level: "★3", pos: [33.7800, 133.6800], q: "【難読地名】「粟生」の読み方は？", ops: ["あおう", "あわお", "あわなま"], ans: "あおう", solved: false },
+            { name: "土佐町・溜井", level: "★3", pos: [33.7500, 133.5500], q: "【難読地名】「溜井」の読み方は？", ops: ["ゆるい", "ためい", "りゅうせい"], ans: "ゆるい", solved: false },
+            { name: "いの町・井流", level: "★3", pos: [33.5500, 133.4000], q: "【難読地名】「井流」の読み方は？", ops: ["ゆる", "いりゅう", "いながれ"], ans: "ゆる", solved: false },
+            { name: "梼原町・上成", level: "★3", pos: [33.4600, 132.9000], q: "【難読地名】「上成」の読み方は？", ops: ["うわなろ", "うえなり", "かみしげ"], ans: "うわなろ", solved: false },
+            { name: "四万十町・天ノ川", level: "★1", pos: [33.2200, 133.0500], q: "【難読地名】「天ノ川」の読み方は？", ops: ["あまのがわ", "てんのかわ", "あいがわ"], ans: "あまのがわ", solved: false },
+            { name: "日高村・赤汢", level: "★3", pos: [33.5400, 133.3500], q: "【難読地名】「赤汢」の読み方は？", ops: ["あかぬた", "あかしお", "あかどろ"], ans: "あかぬた", solved: false },
+            { name: "黒潮町・浮鞭", level: "★2", pos: [33.0300, 133.0100], q: "【難読地名】「浮鞭」の読み方は？", ops: ["うきぶち", "うきむち", "ふべん"], ans: "うきぶち", solved: false },
+            { name: "坂本龍馬誕生地", level: "★1", pos: [33.5614, 133.5285], q: "龍馬が生まれたこの場所、現在は何が立っている？", ops: ["記念碑", "銅像", "実物大の家"], ans: "記念碑", solved: false },
+            { name: "中岡慎太郎像", level: "★2", pos: [33.2482, 134.1755], q: "慎太郎の出身地はどこの村？", ops: ["北川村", "馬路村", "芸西村"], ans: "北川村", solved: false },
+            { name: "武市半平太旧宅", level: "★3", pos: [33.5786, 133.5855], q: "武市半平太の号は？", ops: ["瑞山", "南冥", "雅楽"], ans: "瑞山", solved: false },
+            { name: "岩崎弥太郎生家", level: "★2", pos: [33.5215, 133.9212], q: "三菱マークの由来は彼の家紋？", ops: ["本当", "嘘"], ans: "本当", solved: false },
+            { name: "ジョン万次郎像", level: "★2", pos: [32.7245, 133.0195], q: "万次郎が伝えたスポーツは？", ops: ["野球", "テニス", "サッカー"], ans: "野球", solved: false },
+            { name: "近藤長次郎の碑", level: "★3", pos: [33.5650, 133.5350], q: "饅頭屋の息子だった長次郎の愛称は？", ops: ["饅頭屋長次郎", "お菓子長次郎", "砂糖屋長次郎"], ans: "饅頭屋長次郎", solved: false },
+            { name: "岡豊山", level: "★3", pos: [33.5930, 133.6062], q: "長宗我部元親の居城は？", ops: ["岡豊城", "浦戸城", "朝倉城"], ans: "岡豊城", solved: false },
+            { name: "若宮八幡宮", level: "★3", pos: [33.5042, 133.5511], q: "元親が初陣の祈願をした神社は？", ops: ["若宮八幡宮", "潮江天満宮", "土佐神社"], ans: "若宮八幡宮", solved: false },
+            { name: "雪蹊寺", level: "★3", pos: [33.5028, 133.5505], q: "元親の幼名にちなんだ寺？", ops: ["本当", "嘘"], ans: "本当", solved: false },
+            { name: "板垣退助像", level: "★1", pos: [33.5601, 133.5312], q: "板垣退助が作った政党は？", ops: ["自由党", "進歩党", "共産党"], ans: "自由党", solved: false },
+            { name: "自由民権記念館", level: "★2", pos: [33.5550, 133.5211], q: "自由はどこから吹くとされた？", ops: ["土佐の山間より", "平和の砦", "維新の里"], ans: "土佐の山間より", solved: false },
+            { name: "播磨屋宗徳の墓", level: "★3", pos: [33.5600, 133.5430], q: "「はりまや橋」の由来は？", ops: ["播磨屋", "土佐屋", "高知屋"], ans: "播磨屋", solved: false },
+            { name: "旧山内家下屋敷", level: "★2", pos: [33.5562, 133.5321], q: "藩主・容堂の自称は？", ops: ["鯨海酔侯", "土佐の虎", "酔いどれ大名"], ans: "鯨海酔侯", solved: false },
+            { name: "龍河洞", level: "★3", pos: [33.6033, 133.7436], q: "鍾乳石と合体した土器の名は？", ops: ["神の壺", "時の器", "石の皿"], ans: "神の壺", solved: false },
+            { name: "安居渓谷", level: "★2", pos: [33.6335, 133.1512], q: "最も青い場所は？", ops: ["水晶淵", "にこ淵", "中津渓谷"], ans: "水晶淵", solved: false },
+            { name: "桂浜", level: "★1", pos: [33.4971, 133.5744], q: "龍馬像が見つめる先は？", ops: ["太平洋（海）", "高知城", "富士山"], ans: "太平洋（海）", solved: false },
+            { name: "佐田沈下橋", level: "★1", pos: [32.9984, 132.9333], q: "沈下橋に欄干がない理由は？", ops: ["壊れないため", "安いため", "飛び込むため"], ans: "壊れないため", solved: false },
+            { name: "室戸岬灯台", level: "★2", pos: [33.2472, 134.1751], q: "レンズの直径は？", ops: ["2.6m", "1.0m", "5.0m"], ans: "2.6m", solved: false },
+            { name: "鳴無神社", level: "★3", pos: [33.4358, 133.3985], q: "別名は土佐の何？", ops: ["宮島", "出雲", "成田"], ans: "宮島", solved: false },
+            { name: "大歩危小歩危", level: "★2", pos: [33.8955, 133.7612], q: "名前の由来は？", ops: ["歩くのが危ない", "歩幅が大きい", "景色が良い"], ans: "歩くのが危ない", solved: false },
+            { name: "魚梁瀬森林鉄道", level: "★3", pos: [33.6210, 134.1105], q: "機関車の愛称は？", ops: ["りんてつ", "しんたろう号", "土佐号"], ans: "しんたろう号", solved: false }
         ];
 
         questSpots.forEach((spot, index) => {
             const isNandoku = spot.q.includes("難読");
-            const markerIcon = isNandoku ? dotBlueIcon : dotRedIcon;
+            const markerIcon = isNandoku ? boxClosedBlue : boxClosedRed;
             const marker = L.marker(spot.pos, { icon: markerIcon }).addTo(map);
             spot.marker = marker;
             
-            // ツールチップ設定（星を表示）
             marker.bindTooltip(`<b>${spot.level} ${spot.name}</b>`, {
                 direction: 'top', offset: [0, -25], className: 'custom-tooltip'
             });
 
             marker.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
-                openQuiz(index);
+                // すでに解いている場合はメッセージのみ
+                if (spot.solved) {
+                    alert("この秘宝はすでに手に入れたぜよ！");
+                } else {
+                    openQuiz(index);
+                }
             });
         });
 
@@ -215,12 +204,17 @@
         }
 
         function checkAnswer(userAns, correctAns, index) {
+            const spot = questSpots[index];
             if (userAns === correctAns) {
                 alert("正解！秘宝ゲットぜよ！");
-                score++;
-                updateUI();
-                questSpots[index].marker.setIcon(dotGoldIcon); // クリア後は金色のアイテムに
-                if (score % 10 === 0 && score > 0) showRankUpEffect(score);
+                // 【修正】solvedフラグをチェックして二重カウント防止
+                if (!spot.solved) {
+                    score++;
+                    spot.solved = true; // 解決済みにする
+                    updateUI();
+                    spot.marker.setIcon(boxOpenGold); // アイコンを開いた金の宝箱に
+                    if (score % 10 === 0 && score > 0) showRankUpEffect(score);
+                }
             } else {
                 alert(`ハズレ！残念やったねぇ。\n正解は「${correctAns}」ぜよ！`);
             }
