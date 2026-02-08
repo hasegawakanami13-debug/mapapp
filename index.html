@@ -13,6 +13,18 @@
             cursor: crosshair;
         }
 
+        /* 桜吹雪のスタイル */
+.sakura {
+    position: fixed; top: -10px; z-index: 3000;
+    pointer-events: none; animation: fall linear forwards;
+}
+@keyframes fall {
+    to { transform: translateY(100vh) rotate(360deg); }
+}
+
+/* アイコンの装飾 */
+#rank-icon { font-size: 1.5rem; margin-right: 5px; vertical-align: middle; }
+
         .leaflet-tile { image-rendering: pixelated !important; }
         #map { height: 100vh; width: 100%; z-index: 1; background: #000; }
 
@@ -250,25 +262,42 @@ function checkAnswer(userAns, correctAns, index) {
             closeQuiz();
         }
 
-        function getRankName(s) {
-            if (s >= 45) return "土佐の太守"; // 全問正解
-            if (s >= 35) return "土佐の英雄";
-            if (s >= 25) return "維新の志士";
-            if (s >= 15) return "期待の若武者";
-            if (s >= 5) return "土佐の足軽";
-            return "土佐の旅人";
+       // 称号とアイコンをセットで返すように変更
+        function getRankInfo(s) {
+            if (s >= 45) return { name: "土佐の太守", icon: "🏯" };
+            if (s >= 35) return { name: "土佐の英雄", icon: "🌊" };
+            if (s >= 25) return { name: "維新の志士", icon: "⚓" };
+            if (s >= 15) return { name: "期待 of 若武者", icon: "⚔️" };
+            if (s >= 5) return { name: "土佐の足軽", icon: "🍶" };
+            return { name: "土佐の旅人", icon: "👣" };
         }
 
+        // UI更新時にアイコンも表示
         function updateUI() {
+            const rankInfo = getRankInfo(score);
             document.getElementById('score').innerText = `秘宝: ${score} / ${questSpots.length}`;
-            document.getElementById('current-rank').innerText = getRankName(score);
+            document.getElementById('current-rank').innerHTML = `<span id="rank-icon">${rankInfo.icon}</span>${rankInfo.name}`;
         }
 
-        // メッセージ表示関数を整理
+        // 桜を降らせる関数
+        function createSakura() {
+            for (let i = 0; i < 50; i++) {
+                const sakura = document.createElement('div');
+                sakura.className = 'sakura';
+                sakura.innerText = '🌸';
+                sakura.style.left = Math.random() * 100 + 'vw';
+                sakura.style.fontSize = (Math.random() * 10 + 10) + 'px';
+                sakura.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                sakura.style.opacity = Math.random();
+                document.body.appendChild(sakura);
+                setTimeout(() => sakura.remove(), 5000);
+            }
+        }
+
         function showRankUpEffect(currentScore) {
             const rankDisplay = document.getElementById('rank-display');
             const ijinTalk = document.getElementById('ijin-talk');
-            let rank = getRankName(currentScore);
+            const rankInfo = getRankInfo(currentScore);
             let msg = "";
 
             if (currentScore === 5) {
@@ -284,7 +313,8 @@ function checkAnswer(userAns, correctAns, index) {
             }
 
             if (msg !== "") {
-                rankDisplay.innerText = rank;
+                createSakura(); // 桜を降らせる！
+                rankDisplay.innerText = `${rankInfo.icon} ${rankInfo.name}`;
                 ijinTalk.innerText = msg;
                 document.getElementById('rank-modal').classList.remove('hidden');
             }
