@@ -250,14 +250,15 @@
             closeQuiz();
         }
 
-        function getRankName(s) {
-    if (s >= 45) return "高知完全制覇の王"; // 全問正解
-    if (s >= 35) return "土佐の英雄";
-    if (s >= 25) return "維新の志士";
-    if (s >= 15) return "期待の若武者";
-    if (s >= 5) return "土佐の足軽";
-    return "土佐の旅人";
-}
+    function getRankName(s) {
+            if (s >= 45) return "土佐の太守"; // 全問正解
+            if (s >= 35) return "土佐の英雄";
+            if (s >= 25) return "維新の志士";
+            if (s >= 15) return "期待 of 若武者";
+            if (s >= 5) return "土佐の足軽";
+            return "土佐の旅人";
+        }
+
         function updateUI() {
             document.getElementById('score').innerText = `秘宝: ${score} / ${questSpots.length}`;
             document.getElementById('current-rank').innerText = getRankName(score);
@@ -268,13 +269,23 @@
             const ijinTalk = document.getElementById('ijin-talk');
             let rank = getRankName(currentScore);
             let msg = "";
-            if (currentScore === 10) msg = "ジョン万次郎：\n「Amazing! その調子で高知を知るがじゃ！まだまだ修行中ぜよ！」";
-            else if (currentScore === 20) msg = "板垣退助：\n「おんしゃあの知識は死なず！自由の道を進むがじゃ！」";
-            else if (currentScore === 30) msg = "中岡慎太郎：\n「ええぞ、熱い魂を感じるき。日本の夜明けは近いぜよ！」";
-            else if (currentScore === 40) msg = "坂本龍馬：\n「まっこと感服したぜよ。おんしゃあこそが、真の高知マスターじゃ！」";
-            rankDisplay.innerText = rank;
-            ijinTalk.innerText = msg;
-            document.getElementById('rank-modal').classList.remove('hidden');
+
+            if (currentScore === 5) {
+                msg = "【旅立ちの予感】\n土佐の地を踏みしめ、歴史の扉が開いた。道のりはまだ始まったばかりぜよ！";
+            } else if (currentScore === 15) {
+                msg = "【高鳴る鼓動】\nおんしゃあの知識、まっこと大したもんじゃ。若武者としての名声が広まりよるぜよ！";
+            } else if (currentScore === 25) {
+                msg = "【燃え上がる志】\n荒波を越え、高知の深淵に触れた。志士の魂がその身に宿り始めたようじゃ！";
+            } else if (currentScore === 35) {
+                msg = "【伝説の目撃者】\nもはや土佐に知らぬことなし。その名は四国全土に轟き、英雄として語り継がれるろう！";
+            } else if (currentScore === 45) {
+                msg = "【至高の到達点】\n全秘宝、完全制覇！おんしゃあこそがこの国を統べる「太守」。土佐の夜明けをその手で掴んだぜよ！";
+            }
+            if (msg !== "") {
+                rankDisplay.innerText = rank;
+                ijinTalk.innerText = msg;
+                document.getElementById('rank-modal').classList.remove('hidden');
+            }
         }
 
         function closeQuiz() { document.getElementById('quiz-modal').classList.add('hidden'); }
