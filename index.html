@@ -22,6 +22,23 @@
     to { transform: translateY(100vh) rotate(360deg); }
 }
 
+/* キラキラのスタイル */
+.sparkle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1000;
+    animation: sparkle-burst 1.5s ease-out forwards;
+    font-size: 20px;
+}
+
+@keyframes sparkle-burst {
+    0% { transform: translate(0, 0) scale(0); opacity: 1; }
+    100% { 
+        transform: translate(var(--tx), var(--ty)) scale(1.5); 
+        opacity: 0; 
+    }
+}
+        
 /* アイコンの装飾 */
 #rank-icon { font-size: 1.5rem; margin-right: 5px; vertical-align: middle; }
 
@@ -154,7 +171,7 @@
             { name: "中岡慎太郎像", level: "★2", pos: [33.2482, 134.1755], q: "慎太郎の出身地はどこの村？", ops: ["馬路村", "北川村", "芸西村"], ans: "北川村", solved: false },
             { name: "日本最後の清流", level: "★1", pos: [32.9900, 132.9300], q: "大規模なダムがなく、「日本最後の清流」と呼ばれている川は？", ops: ["仁淀川", "四万十川", "鏡川"], ans: "四万十川", solved: false },
             { name: "武市半平太旧宅", level: "★3", pos: [33.5786, 133.5855], q: "武市半平太（たけち はんぺいた）が名乗っていた別名（号）は？", ops: ["南冥（なんめい）", "瑞山（ずいざん）", "雅楽（うた）"], ans: "瑞山（ずいざん）", solved: false },
-            { name: "高知の夏祭り", level: "★1", pos: [33.5585, 133.5310], q: "鳴子（なるこ）を鳴らして踊る、高知発祥の情熱的なお祭りは？", ops: ["阿波踊り", "よさこい祭り", "ねぶた祭り"], ans: "よさこい祭り", solved: false },
+            { name: "高知の夏祭り", level: "★1", pos: [33.5585, 133.5310], q: "鳴子（なるこ）を鳴らして踊る、高知発祥のお祭りは？", ops: ["阿波踊り", "よさこい祭り", "ねぶた祭り"], ans: "よさこい祭り", solved: false },
             { name: "高知城・追手門", level: "★1", pos: [33.5601, 133.5330], q: "高知城の天守閣（てんしゅかく）は、江戸時代から残る「現存◯天守」の一つ？", ops: ["現存12天守", "現存5天守", "現存100天守"], ans: "現存12天守", solved: false },
             { name: "岩崎弥太郎生家", level: "★2", pos: [33.5215, 133.9212], q: "三菱のマークの一つの由来になった岩崎家の家紋は？", ops: ["三つ柏（みつがしわ）", "三つ鱗（みつうろこ）", "三階菱（さんがいびし）"], ans: "三階菱（さんがいびし）", solved: false },
             { name: "近藤長次郎の碑", level: "★2", pos: [33.5650, 133.5350], q: "饅頭屋の息子だった長次郎の愛称は？", ops: ["お菓子長次郎", "砂糖屋長次郎", "饅頭屋長次郎"], ans: "饅頭屋長次郎", solved: false },
@@ -230,37 +247,68 @@
             document.getElementById('quiz-modal').classList.remove('hidden');
         }
 
-function checkAnswer(userAns, correctAns, index) {
-            const spot = questSpots[index];
-            const isNandoku = spot.q.includes("難読");
+function createSparkles(latlng) {
+    // 地図上の座標を画面のピクセル位置に変換
+    const point = map.latLngToContainerPoint(latlng);
+    const container = document.getElementById('map');
 
-            if (userAns === correctAns) {
-                let winMsg = "正解！秘宝ゲットぜよ！";
-                if (spot.level === "★3") {
-                    winMsg = "【驚愕】おんしゃあ、まっこと詳しいねぇ！★3を解くとは天才ぜよ！";
-                } else if (isNandoku) {
-                    winMsg = `「${spot.ans}」！\nよう読めたねぇ、地元の人もびっくりぜよ！`;
-                } else if (spot.level === "★1") {
-                    winMsg = "正解！これは基本ぜよ。サクサク集めるがじゃ！";
-                }
-                
-                alert(winMsg);
-                
-                if (!spot.solved) {
-                    score++;
-                    spot.solved = true; 
-                    updateUI();
-                    spot.marker.setIcon(boxOpenGold);
-                    // 修正：10の倍数ではなく、全てのスコアでチェックを通すように変更
-                    showRankUpEffect(score);
-                }
-            } else {
-                let failMsg = `ハズレ！残念やったねぇ。`;
-                if (spot.level === "★3") failMsg = "これは難しかったちや…。";
-                alert(`${failMsg}\n正解は「${correctAns}」ぜよ！`);
-            }
-            closeQuiz();
+    for (let i = 0; i < 15; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        sparkle.innerText = '✨';
+        
+        // 飛び散る方向をランダムに設定（CSS変数を使用）
+        const tx = (Math.random() - 0.5) * 200 + 'px';
+        const ty = (Math.random() - 0.5) * 200 + 'px';
+        sparkle.style.setProperty('--tx', tx);
+        sparkle.style.setProperty('--ty', ty);
+        
+        // 出現位置（クリックした宝箱の位置）
+        sparkle.style.left = point.x + 'px';
+        sparkle.style.top = point.y + 'px';
+        
+        container.appendChild(sparkle);
+        
+        // アニメーション終了後に削除
+        setTimeout(() => sparkle.remove(), 1500);
+    }
+}
+
+// checkAnswer関数を少し修正（createSparklesを呼び出す）
+function checkAnswer(userAns, correctAns, index) {
+    const spot = questSpots[index];
+    const isNandoku = spot.q.includes("難読");
+
+    if (userAns === correctAns) {
+        // --- 演出追加 ---
+        createSparkles(spot.pos); // 正解した場所にキラキラを出す！
+        // ----------------
+
+        let winMsg = "正解！秘宝ゲットぜよ！";
+        if (spot.level === "★3") {
+            winMsg = "【驚愕】おんしゃあ、まっこと詳しいねぇ！★3を解くとは天才ぜよ！";
+        } else if (isNandoku) {
+            winMsg = `「${spot.ans}」！\nよう読めたねぇ、地元の人もびっくりぜよ！`;
+        } else if (spot.level === "★1") {
+            winMsg = "正解！これは基本ぜよ。サクサク集めるがじゃ！";
         }
+        
+        alert(winMsg);
+        
+        if (!spot.solved) {
+            score++;
+            spot.solved = true; 
+            updateUI();
+            spot.marker.setIcon(boxOpenGold);
+            showRankUpEffect(score);
+        }
+    } else {
+        let failMsg = `ハズレ！残念やったねぇ。`;
+        if (spot.level === "★3") failMsg = "これは難しかったちや…。";
+        alert(`${failMsg}\n正解は「${correctAns}」ぜよ！`);
+    }
+    closeQuiz();
+}
 
        // 称号とアイコンをセットで返すように変更
         function getRankInfo(s) {
