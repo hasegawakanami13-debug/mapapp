@@ -218,12 +218,11 @@
             document.getElementById('quiz-modal').classList.remove('hidden');
         }
 
-        function checkAnswer(userAns, correctAns, index) {
+function checkAnswer(userAns, correctAns, index) {
             const spot = questSpots[index];
             const isNandoku = spot.q.includes("難読");
 
             if (userAns === correctAns) {
-                // 難易度や種類によるメッセージの出し分け
                 let winMsg = "正解！秘宝ゲットぜよ！";
                 if (spot.level === "★3") {
                     winMsg = "【驚愕】おんしゃあ、まっこと詳しいねぇ！★3を解くとは天才ぜよ！";
@@ -240,7 +239,8 @@
                     spot.solved = true; 
                     updateUI();
                     spot.marker.setIcon(boxOpenGold);
-                    if (score % 10 === 0 && score > 0) showRankUpEffect(score);
+                    // 修正：10の倍数ではなく、全てのスコアでチェックを通すように変更
+                    showRankUpEffect(score);
                 }
             } else {
                 let failMsg = `ハズレ！残念やったねぇ。`;
@@ -250,7 +250,7 @@
             closeQuiz();
         }
 
-    function getRankName(s) {
+        function getRankName(s) {
             if (s >= 45) return "土佐の太守"; // 全問正解
             if (s >= 35) return "土佐の英雄";
             if (s >= 25) return "維新の志士";
@@ -264,6 +264,7 @@
             document.getElementById('current-rank').innerText = getRankName(score);
         }
 
+        // メッセージ表示関数を整理
         function showRankUpEffect(currentScore) {
             const rankDisplay = document.getElementById('rank-display');
             const ijinTalk = document.getElementById('ijin-talk');
@@ -281,6 +282,7 @@
             } else if (currentScore === 45) {
                 msg = "【至高の到達点】\n全秘宝、完全制覇！おんしゃあこそがこの国を統べる「太守」。土佐の夜明けをその手で掴んだぜよ！";
             }
+
             if (msg !== "") {
                 rankDisplay.innerText = rank;
                 ijinTalk.innerText = msg;
