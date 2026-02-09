@@ -13,7 +13,6 @@
             cursor: crosshair;
         }
 
-        /* 桜吹雪のスタイル */
 .sakura {
     position: fixed; top: -10px; z-index: 3000;
     pointer-events: none; animation: fall linear forwards;
@@ -22,7 +21,6 @@
     to { transform: translateY(100vh) rotate(360deg); }
 }
 
-/* キラキラのスタイル */
 .sparkle {
     position: absolute;
     pointer-events: none;
@@ -39,7 +37,6 @@
     }
 }
         
-/* アイコンの装飾 */
 #rank-icon { font-size: 1.5rem; margin-right: 5px; vertical-align: middle; }
 
         .leaflet-tile { image-rendering: pixelated !important; }
@@ -248,7 +245,7 @@
         }
 
 function createSparkles(latlng) {
-    // 地図上の座標を画面のピクセル位置に変換
+    
     const point = map.latLngToContainerPoint(latlng);
     const container = document.getElementById('map');
 
@@ -256,32 +253,24 @@ function createSparkles(latlng) {
         const sparkle = document.createElement('div');
         sparkle.className = 'sparkle';
         sparkle.innerText = '✨';
-        
-        // 飛び散る方向をランダムに設定（CSS変数を使用）
         const tx = (Math.random() - 0.5) * 200 + 'px';
         const ty = (Math.random() - 0.5) * 200 + 'px';
         sparkle.style.setProperty('--tx', tx);
         sparkle.style.setProperty('--ty', ty);
-        
-        // 出現位置（クリックした宝箱の位置）
         sparkle.style.left = point.x + 'px';
         sparkle.style.top = point.y + 'px';
         
         container.appendChild(sparkle);
-        
-        // アニメーション終了後に削除
         setTimeout(() => sparkle.remove(), 1500);
     }
 }
 
-// checkAnswer関数を少し修正（createSparklesを呼び出す）
 function checkAnswer(userAns, correctAns, index) {
     const spot = questSpots[index];
     const isNandoku = spot.q.includes("難読");
 
     if (userAns === correctAns) {
-        // --- 演出追加 ---
-        createSparkles(spot.pos); // 正解した場所にキラキラを出す！
+        createSparkles(spot.pos);
         // ----------------
 
         let winMsg = "正解！秘宝ゲットぜよ！";
@@ -310,7 +299,6 @@ function checkAnswer(userAns, correctAns, index) {
     closeQuiz();
 }
 
-       // 称号とアイコンをセットで返すように変更
         function getRankInfo(s) {
             if (s >= 45) return { name: "土佐の太守", icon: "🏯" };
             if (s >= 35) return { name: "土佐の英雄", icon: "🌊" };
@@ -320,14 +308,12 @@ function checkAnswer(userAns, correctAns, index) {
             return { name: "土佐の旅人", icon: "👣" };
         }
 
-        // UI更新時にアイコンも表示
         function updateUI() {
             const rankInfo = getRankInfo(score);
             document.getElementById('score').innerText = `秘宝: ${score} / ${questSpots.length}`;
             document.getElementById('current-rank').innerHTML = `<span id="rank-icon">${rankInfo.icon}</span>${rankInfo.name}`;
         }
 
-        // 桜を降らせる関数
         function createSakura() {
             for (let i = 0; i < 50; i++) {
                 const sakura = document.createElement('div');
@@ -361,7 +347,7 @@ function checkAnswer(userAns, correctAns, index) {
             }
 
             if (msg !== "") {
-                createSakura(); // 桜を降らせる！
+                createSakura();
                 rankDisplay.innerText = `${rankInfo.icon} ${rankInfo.name}`;
                 ijinTalk.innerText = msg;
                 document.getElementById('rank-modal').classList.remove('hidden');
