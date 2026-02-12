@@ -13,24 +13,23 @@
             cursor: crosshair;
         }
 
-.sparkle {
-    position: absolute;
-    pointer-events: none;
-    z-index: 1000;
-    animation: sparkle-burst 1.5s ease-out forwards;
-    font-size: 20px;
-}
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1000;
+            animation: sparkle-burst 1.5s ease-out forwards;
+            font-size: 20px;
+        }
 
-@keyframes sparkle-burst {
-    0% { transform: translate(0, 0) scale(0); opacity: 1; }
-    100% { 
-        transform: translate(var(--tx), var(--ty)) scale(1.5); 
-        opacity: 0; 
-    }
-}
+        @keyframes sparkle-burst {
+            0% { transform: translate(0, 0) scale(0); opacity: 1; }
+            100% { 
+                transform: translate(var(--tx), var(--ty)) scale(1.5); 
+                opacity: 0; 
+            }
+        }
         
-#rank-icon { font-size: 1.5rem; margin-right: 5px; vertical-align: middle; }
-
+        #rank-icon { font-size: 1.5rem; margin-right: 5px; vertical-align: middle; }
         .leaflet-tile { image-rendering: pixelated !important; }
         #map { height: 100vh; width: 100%; z-index: 1; background: #000; }
 
@@ -87,11 +86,11 @@
             filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.5));
         }
         .gold-leaf {
-    position: fixed; top: -10px; z-index: 3000;
-    pointer-events: none; animation: fall linear forwards;
-    color: #ffd700; font-weight: bold;
-    text-shadow: 0 0 5px #fff;
-}
+            position: fixed; top: -50px; z-index: 3000;
+            pointer-events: none;
+            color: #ffd700; font-weight: bold;
+            text-shadow: 0 0 5px #fff;
+        }
     </style>
 </head>
 <body>
@@ -129,7 +128,7 @@
             tap: true, zoomControl: false, minZoom: 4, maxZoom: 18
         }).setView([33.35, 133.4], 9);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         let score = 0;
 
@@ -186,7 +185,7 @@
             { name: "大月町・柏島", level: "★2", pos: [32.7680, 132.6280], q: "「船が浮いて見える」ほどの透明度を誇る柏島。ここで見られる魚の種類は日本全体の何分の一？", ops: ["約3分の1", "約5分の1", "約10分の1"], ans: "約3分の1", solved: false },
             { name: "土佐清水・偉人", level: "★1", pos: [32.7785, 132.9550], q: "江戸時代にアメリカへ渡り、日米の架け橋となった土佐清水出身の人物は？", ops: ["ジョン万次郎", "ペリー", "中岡慎太郎"], ans: "ジョン万次郎", solved: false },
             { name: "佐田沈下橋", level: "★1", pos: [32.9984, 132.9333], q: "沈下橋に欄干（手すり）がない最大の理由は？", ops: ["建設費用を抑えるため", "川に飛び込みやすくするため", "流木などが引っかかりにくくするため"], ans: "流木などが引っかかりにくくするため", solved: false },
-           { name: "仁淀川", level: "★2", pos: [33.6400, 133.3000], q: "「仁淀ブルー」の聖地として知られる幻想的な滝つぼの名前は？", ops: ["にこ淵", "あこ淵", "青の洞窟"], ans: "にこ淵", solved: false },
+            { name: "仁淀川", level: "★2", pos: [33.6400, 133.3000], q: "「仁淀ブルー」の聖地として知られる幻想的な滝つぼの名前は？", ops: ["にこ淵", "あこ淵", "青の洞窟"], ans: "にこ淵", solved: false },
             { name: "鳴無神社", level: "★2", pos: [33.4358, 133.3985], q: "参道が海に向かっていることから、別名「土佐の何」と呼ばれる？", ops: ["土佐の出雲", "土佐の宮島", "土佐の成田"], ans: "土佐の宮島", solved: false },
             { name: "魚梁瀬森林鉄道", level: "★2", pos: [33.6210, 134.1105], q: "かつて木材を運んだこの鉄道を走る機関車の復元車両の愛称は？", ops: ["土佐号", "りんてつ号", "しんたろう号"], ans: "しんたろう号", solved: false }
         ];
@@ -241,60 +240,58 @@
             document.getElementById('quiz-modal').classList.remove('hidden');
         }
 
-function createSparkles(latlng) {
-    
-    const point = map.latLngToContainerPoint(latlng);
-    const container = document.getElementById('map');
+        function createSparkles(latlng) {
+            const point = map.latLngToContainerPoint(latlng);
+            const container = document.getElementById('map');
 
-    for (let i = 0; i < 15; i++) {
-        const sparkle = document.createElement('div');
-        sparkle.className = 'sparkle';
-        sparkle.innerText = '✨';
-        const tx = (Math.random() - 0.5) * 200 + 'px';
-        const ty = (Math.random() - 0.5) * 200 + 'px';
-        sparkle.style.setProperty('--tx', tx);
-        sparkle.style.setProperty('--ty', ty);
-        sparkle.style.left = point.x + 'px';
-        sparkle.style.top = point.y + 'px';
-        
-        container.appendChild(sparkle);
-        setTimeout(() => sparkle.remove(), 1500);
-    }
-}
-
-function checkAnswer(userAns, correctAns, index) {
-    const spot = questSpots[index];
-    const isNandoku = spot.q.includes("難読");
-
-    if (userAns === correctAns) {
-        createSparkles(spot.pos);
-        // ----------------
-
-        let winMsg = "正解！秘宝ゲットぜよ！";
-        if (spot.level === "★3") {
-            winMsg = "【驚愕】おんしゃあ、まっこと詳しいねぇ！★3を解くとは天才ぜよ！";
-        } else if (isNandoku) {
-            winMsg = `「${spot.ans}」！\nよう読めたねぇ、地元の人もびっくりぜよ！`;
-        } else if (spot.level === "★1") {
-            winMsg = "正解！これは基本ぜよ。サクサク集めるがじゃ！";
+            for (let i = 0; i < 15; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.innerText = '✨';
+                const tx = (Math.random() - 0.5) * 200 + 'px';
+                const ty = (Math.random() - 0.5) * 200 + 'px';
+                sparkle.style.setProperty('--tx', tx);
+                sparkle.style.setProperty('--ty', ty);
+                sparkle.style.left = point.x + 'px';
+                sparkle.style.top = point.y + 'px';
+                
+                container.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 1500);
+            }
         }
-        
-        alert(winMsg);
-        
-        if (!spot.solved) {
-            score++;
-            spot.solved = true; 
-            updateUI();
-            spot.marker.setIcon(boxOpenGold);
-            showRankUpEffect(score);
+
+        function checkAnswer(userAns, correctAns, index) {
+            const spot = questSpots[index];
+            const isNandoku = spot.q.includes("難読");
+
+            if (userAns === correctAns) {
+                createSparkles(spot.pos);
+
+                if (!spot.solved) {
+                    spot.solved = true; 
+                    score++;
+                    updateUI();
+                    spot.marker.setIcon(boxOpenGold);
+
+                    let winMsg = "正解！秘宝ゲットぜよ！";
+                    if (spot.level === "★3") {
+                        winMsg = "【驚愕】おんしゃあ、まっこと詳しいねぇ！★3を解くとは天才ぜよ！";
+                    } else if (isNandoku) {
+                        winMsg = `「${spot.ans}」！\nよう読めたねぇ、地元の人もびっくりぜよ！`;
+                    } else if (spot.level === "★1") {
+                        winMsg = "正解！これは基本ぜよ。サクサク集めるがじゃ！";
+                    }
+                    
+                    alert(winMsg);
+                    showRankUpEffect(score);
+                }
+            } else {
+                let failMsg = `ハズレ！残念やったねぇ。`;
+                if (spot.level === "★3") failMsg = "これは難しかったちや…。";
+                alert(`${failMsg}\n正解は「${correctAns}」ぜよ！`);
+            }
+            closeQuiz();
         }
-    } else {
-        let failMsg = `ハズレ！残念やったねぇ。`;
-        if (spot.level === "★3") failMsg = "これは難しかったちや…。";
-        alert(`${failMsg}\n正解は「${correctAns}」ぜよ！`);
-    }
-    closeQuiz();
-}
 
         function getRankInfo(s) {
             if (s >= 45) return { name: "土佐の覇者", icon: "🏯" };
@@ -312,9 +309,9 @@ function checkAnswer(userAns, correctAns, index) {
         }
 
         function createRankEffect(currentScore) {
-    let emojis = [];
-    let count = 40;
-    let className = 'gold-leaf';
+            let emojis = [];
+            let count = 40;
+            let className = 'gold-leaf';
 
             if (currentScore === 5) {
                 emojis = ['🍶', '🍱', '🍺'];
@@ -327,42 +324,37 @@ function checkAnswer(userAns, correctAns, index) {
             } else if (currentScore === 45) {
                 emojis = ['🏯', '🎊', '✨', '🟡', '🏮', '🉐', '👑'];
                 count = 120; 
-                className = 'gold-leaf'; 
             } else {
                 emojis = ['🌸'];
             }
 
-       for (let i = 0; i < count; i++) {
-        const leaf = document.createElement('div');
-        leaf.className = 'gold-leaf'; 
-        leaf.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-        leaf.style.left = Math.random() * 100 + 'vw';
-        leaf.style.top = '-50px';
-        leaf.style.position = 'fixed';
-        leaf.style.zIndex = '3000';
-        leaf.style.fontSize = (Math.random() * 15 + 15) + 'px';
-        
-        const duration = (Math.random() * 3 + 2);
-        leaf.style.transition = `transform ${duration}s linear, opacity ${duration}s`;
-        document.body.appendChild(leaf);
+            for (let i = 0; i < count; i++) {
+                const leaf = document.createElement('div');
+                leaf.className = className; 
+                leaf.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                leaf.style.left = Math.random() * 100 + 'vw';
+                
+                const duration = (Math.random() * 3 + 2);
+                leaf.style.transition = `transform ${duration}s linear, opacity ${duration}s`;
+                document.body.appendChild(leaf);
 
-        setTimeout(() => {
-            leaf.style.transform = `translateY(110vh) rotate(${Math.random() * 360}deg)`;
-            leaf.style.opacity = '0';
-        }, 100);
+                setTimeout(() => {
+                    leaf.style.transform = `translateY(110vh) rotate(${Math.random() * 360}deg)`;
+                    leaf.style.opacity = '0';
+                }, 100);
 
-        setTimeout(() => leaf.remove(), duration * 1000);
-    }
-}
+                setTimeout(() => leaf.remove(), duration * 1000);
+            }
+        }
 
-function showRankUpEffect(currentScore) {
-    const rankDisplay = document.getElementById('rank-display');
-    const ijinTalk = document.getElementById('ijin-talk');
-    const rankInfo = getRankInfo(currentScore);
-    let msg = "";
+        function showRankUpEffect(currentScore) {
+            const rankDisplay = document.getElementById('rank-display');
+            const ijinTalk = document.getElementById('ijin-talk');
+            const rankInfo = getRankInfo(currentScore);
+            let msg = "";
 
-    const milestones = [5, 15, 25, 35, 45];
-    if (!milestones.includes(currentScore)) return;
+            const milestones = [5, 15, 25, 35, 45];
+            if (!milestones.includes(currentScore)) return;
 
             if (currentScore === 5) {
                 msg = "【旅立ちの予感】\n土佐の地を踏みしめ、歴史の扉が開いた。道のりはまだ始まったばかりぜよ！";
@@ -378,7 +370,6 @@ function showRankUpEffect(currentScore) {
 
             if (msg !== "") {
                 createRankEffect(currentScore); 
-                
                 rankDisplay.innerText = `${rankInfo.icon} ${rankInfo.name}`;
                 ijinTalk.innerText = msg;
                 document.getElementById('rank-modal').classList.remove('hidden');
