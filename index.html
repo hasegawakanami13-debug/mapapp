@@ -297,7 +297,7 @@ function checkAnswer(userAns, correctAns, index) {
 }
 
         function getRankInfo(s) {
-            if (s >= 45) return { name: "土佐の太守", icon: "🏯" };
+            if (s >= 45) return { name: "土佐の覇者", icon: "🏯" };
             if (s >= 35) return { name: "土佐の英雄", icon: "🌊" };
             if (s >= 25) return { name: "維新の志士", icon: "⚓" };
             if (s >= 15) return { name: "期待の若武者", icon: "⚔️" };
@@ -334,7 +334,7 @@ function checkAnswer(userAns, correctAns, index) {
 
        for (let i = 0; i < count; i++) {
         const leaf = document.createElement('div');
-        leaf.className = 'gold-leaf'; // スタイルで定義したクラス
+        leaf.className = 'gold-leaf'; 
         leaf.innerText = emojis[Math.floor(Math.random() * emojis.length)];
         leaf.style.left = Math.random() * 100 + 'vw';
         leaf.style.top = '-50px';
@@ -371,9 +371,9 @@ function showRankUpEffect(currentScore) {
             } else if (currentScore === 25) {
                 msg = "【燃え上がる志】\n荒波を越え、高知の深淵に触れた。志士の魂がその身に宿り始めたようじゃ！";
             } else if (currentScore === 35) {
-                msg = "【伝説の目撃者】\nもはや土佐に知らぬことなし。その名は四国全土に轟き、英雄として語り継がれるろう！";
+                msg = "【英雄の誕生】\nもはや土佐に知らぬことなし。その名は四国全土に轟き、英雄として語り継がれるろう！";
             } else if (currentScore === 45) {
-                msg = "【至高の到達点】\n全秘宝、完全制覇！おんしゃあこそがこの国を統べる「太守」。土佐の夜明けをその手で掴んだぜよ！";
+                msg = "【至高の到達点】\n全秘宝、完全制覇！おんしゃあが土佐の頂点じゃ！土佐の夜明けをその手で掴んだぜよ！";
             }
 
             if (msg !== "") {
