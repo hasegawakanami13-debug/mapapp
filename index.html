@@ -13,14 +13,6 @@
             cursor: crosshair;
         }
 
-.sakura {
-    position: fixed; top: -10px; z-index: 3000;
-    pointer-events: none; animation: fall linear forwards;
-}
-@keyframes fall {
-    to { transform: translateY(100vh) rotate(360deg); }
-}
-
 .sparkle {
     position: absolute;
     pointer-events: none;
@@ -199,7 +191,6 @@
             { name: "魚梁瀬森林鉄道", level: "★2", pos: [33.6210, 134.1105], q: "かつて木材を運んだこの鉄道を走る機関車の復元車両の愛称は？", ops: ["土佐号", "りんてつ号", "しんたろう号"], ans: "しんたろう号", solved: false }
         ];
 
-        // シャッフル関数
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -320,24 +311,10 @@ function checkAnswer(userAns, correctAns, index) {
             document.getElementById('current-rank').innerHTML = `<span id="rank-icon">${rankInfo.icon}</span>${rankInfo.name}`;
         }
 
-        function createSakura() {
-            for (let i = 0; i < 50; i++) {
-                const sakura = document.createElement('div');
-                sakura.className = 'sakura';
-                sakura.innerText = '🌸';
-                sakura.style.left = Math.random() * 100 + 'vw';
-                sakura.style.fontSize = (Math.random() * 10 + 10) + 'px';
-                sakura.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                sakura.style.opacity = Math.random();
-                document.body.appendChild(sakura);
-                setTimeout(() => sakura.remove(), 5000);
-            }
-        }
-
         function createRankEffect(currentScore) {
-            let emojis = [];
-            let count = 50;
-            let className = 'sakura';
+    let emojis = [];
+    let count = 40;
+    let className = 'gold-leaf';
 
             if (currentScore === 5) {
                 emojis = ['🍶', '🍱', '🍺'];
@@ -349,31 +326,43 @@ function checkAnswer(userAns, correctAns, index) {
                 emojis = ['🐉', '🔥', '🌊', '✨'];
             } else if (currentScore === 45) {
                 emojis = ['🏯', '🎊', '✨', '🟡', '🏮', '🉐', '👑'];
-                count = 120; // 太守は大量
-                className = 'gold-leaf'; // 太守専用の輝き
+                count = 120; 
+                className = 'gold-leaf'; 
             } else {
                 emojis = ['🌸'];
             }
 
-            for (let i = 0; i < count; i++) {
-                const leaf = document.createElement('div');
-                leaf.className = className;
-                leaf.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-                leaf.style.left = Math.random() * 100 + 'vw';
-                leaf.style.fontSize = (Math.random() * 15 + 15) + 'px';
-                leaf.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                leaf.style.opacity = Math.random() + 0.5;
-                document.body.appendChild(leaf);
-                setTimeout(() => leaf.remove(), 5000);
-            }
-        }
+       for (let i = 0; i < count; i++) {
+        const leaf = document.createElement('div');
+        leaf.className = 'gold-leaf'; // スタイルで定義したクラス
+        leaf.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+        leaf.style.left = Math.random() * 100 + 'vw';
+        leaf.style.top = '-50px';
+        leaf.style.position = 'fixed';
+        leaf.style.zIndex = '3000';
+        leaf.style.fontSize = (Math.random() * 15 + 15) + 'px';
+        
+        const duration = (Math.random() * 3 + 2);
+        leaf.style.transition = `transform ${duration}s linear, opacity ${duration}s`;
+        document.body.appendChild(leaf);
 
-        // 2. 既存の showRankUpEffect 関数の中身を1箇所だけ書き換え
-        function showRankUpEffect(currentScore) {
-            const rankDisplay = document.getElementById('rank-display');
-            const ijinTalk = document.getElementById('ijin-talk');
-            const rankInfo = getRankInfo(currentScore);
-            let msg = "";
+        setTimeout(() => {
+            leaf.style.transform = `translateY(110vh) rotate(${Math.random() * 360}deg)`;
+            leaf.style.opacity = '0';
+        }, 100);
+
+        setTimeout(() => leaf.remove(), duration * 1000);
+    }
+}
+
+function showRankUpEffect(currentScore) {
+    const rankDisplay = document.getElementById('rank-display');
+    const ijinTalk = document.getElementById('ijin-talk');
+    const rankInfo = getRankInfo(currentScore);
+    let msg = "";
+
+    const milestones = [5, 15, 25, 35, 45];
+    if (!milestones.includes(currentScore)) return;
 
             if (currentScore === 5) {
                 msg = "【旅立ちの予感】\n土佐の地を踏みしめ、歴史の扉が開いた。道のりはまだ始まったばかりぜよ！";
@@ -388,7 +377,6 @@ function checkAnswer(userAns, correctAns, index) {
             }
 
             if (msg !== "") {
-                // ここを createSakura(); から書き換え
                 createRankEffect(currentScore); 
                 
                 rankDisplay.innerText = `${rankInfo.icon} ${rankInfo.name}`;
