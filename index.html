@@ -94,6 +94,12 @@
             image-rendering: pixelated; 
             filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.5));
         }
+        .gold-leaf {
+    position: fixed; top: -10px; z-index: 3000;
+    pointer-events: none; animation: fall linear forwards;
+    color: #ffd700; font-weight: bold;
+    text-shadow: 0 0 5px #fff;
+}
     </style>
 </head>
 <body>
@@ -328,6 +334,41 @@ function checkAnswer(userAns, correctAns, index) {
             }
         }
 
+        function createRankEffect(currentScore) {
+            let emojis = [];
+            let count = 50;
+            let className = 'sakura';
+
+            if (currentScore === 5) {
+                emojis = ['🍶', '🍱', '🍺'];
+            } else if (currentScore === 15) {
+                emojis = ['⚔️', '🤺', '🍃'];
+            } else if (currentScore === 25) {
+                emojis = ['⚓', '🚢', '🌊'];
+            } else if (currentScore === 35) {
+                emojis = ['🐉', '🔥', '🌊', '✨'];
+            } else if (currentScore === 45) {
+                emojis = ['🏯', '🎊', '✨', '🟡', '🏮', '🉐', '👑'];
+                count = 120; // 太守は大量
+                className = 'gold-leaf'; // 太守専用の輝き
+            } else {
+                emojis = ['🌸'];
+            }
+
+            for (let i = 0; i < count; i++) {
+                const leaf = document.createElement('div');
+                leaf.className = className;
+                leaf.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                leaf.style.left = Math.random() * 100 + 'vw';
+                leaf.style.fontSize = (Math.random() * 15 + 15) + 'px';
+                leaf.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                leaf.style.opacity = Math.random() + 0.5;
+                document.body.appendChild(leaf);
+                setTimeout(() => leaf.remove(), 5000);
+            }
+        }
+
+        // 2. 既存の showRankUpEffect 関数の中身を1箇所だけ書き換え
         function showRankUpEffect(currentScore) {
             const rankDisplay = document.getElementById('rank-display');
             const ijinTalk = document.getElementById('ijin-talk');
@@ -347,7 +388,9 @@ function checkAnswer(userAns, correctAns, index) {
             }
 
             if (msg !== "") {
-                createSakura();
+                // ここを createSakura(); から書き換え
+                createRankEffect(currentScore); 
+                
                 rankDisplay.innerText = `${rankInfo.icon} ${rankInfo.name}`;
                 ijinTalk.innerText = msg;
                 document.getElementById('rank-modal').classList.remove('hidden');
